@@ -1,0 +1,354 @@
+@import 'tailwindcss';
+
+@config '../../../../tailwind.config.cjs';
+
+@layer theme {
+	:root {
+		/* Brand & Accent */
+		--primary: #000000;
+		--primary-active: #1a1a1a;
+		--primary-deep: #000000;
+		--primary-mild: #171717;
+		--primary-subtle: rgba(0, 0, 0, 0.05);
+		--text-link: #0d74ce;
+		--text-link-secondary: #476cff;
+		--accent-link-bright: #47c2ff;
+		--accent-warning: #ab6400;
+		--accent-preview: #8145b5;
+
+		/* Surface & Canvas */
+		--canvas: #ffffff;
+		--canvas-soft: #fafafa;
+		--surface-card: #ffffff;
+		--surface-strong: #f0f0f3;
+		--surface-dark: #171717;
+		--surface-dark-elevated: #1a1a1a;
+		--neutral: #ffffff;
+
+		/* Atmospheric Backdrop */
+		--gradient-sky-light: #cfe7ff;
+		--gradient-sky-mid: #a8c8e8;
+
+		/* Hairlines / Borders */
+		--hairline: #f0f0f3;
+		--hairline-soft: #f5f5f7;
+		--hairline-strong: #dcdee0;
+
+		/* Text & Ink */
+		--ink: #171717;
+		--body: #60646c;
+		--body-strong: #171717;
+		--muted: #999999;
+		--muted-soft: #cccccc;
+		--on-primary: #ffffff;
+		--on-dark: #ffffff;
+		--on-dark-soft: #b0b4ba;
+
+		/* Semantic */
+		--error: #eb8e90;
+		--error-subtle: rgba(235, 142, 144, 0.15);
+		--success: #16a34a;
+		--success-subtle: rgba(22, 163, 74, 0.15);
+		--info: #0d74ce;
+		--info-subtle: rgba(13, 116, 206, 0.15);
+		--warning: #ab6400;
+		--warning-subtle: rgba(171, 100, 0, 0.15);
+		--semantic-error: #eb8e90;
+		--semantic-success: #16a34a;
+
+		/* Grays */
+		--gray-50: #fafafa;
+		--gray-100: #f5f5f7;
+		--gray-200: #f0f0f3;
+		--gray-300: #dcdee0;
+		--gray-400: #cccccc;
+		--gray-500: #999999;
+		--gray-600: #60646c;
+		--gray-700: #404040;
+		--gray-800: #262626;
+		--gray-900: #171717;
+		--gray-950: #0a0a0a;
+	}
+
+	.dark {
+		--primary: #ffffff;
+		--primary-active: #e5e5e5;
+		--primary-deep: #ffffff;
+		--primary-mild: #e5e5e5;
+		--primary-subtle: rgba(255, 255, 255, 0.1);
+		
+		--canvas: #171717;
+		--canvas-soft: #1a1a1a;
+		--surface-card: #1f1f1f;
+		--surface-strong: #262626;
+		--surface-dark: #0a0a0a;
+		--surface-dark-elevated: #171717;
+
+		--ink: #ffffff;
+		--body: #b0b4ba;
+		--body-strong: #ffffff;
+		--muted: #808080;
+		--muted-soft: #525252;
+		--on-primary: #171717;
+
+		--hairline: #262626;
+		--hairline-soft: #1f1f1f;
+		--hairline-strong: #404040;
+
+		--gray-50: #1a1a1a;
+		--gray-100: #262626;
+		--gray-200: #333333;
+		--gray-300: #404040;
+		--gray-400: #60646c;
+		--gray-500: #808080;
+		--gray-600: #b0b4ba;
+		--gray-700: #dcdee0;
+		--gray-800: #f0f0f3;
+		--gray-900: #ffffff;
+		--gray-950: #fafafa;
+	}
+}
+
+@layer base {
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--hairline-strong, currentColor);
+	}
+
+	button, [role=button] {
+		cursor: pointer;
+	}
+
+	body {
+		@apply text-body dark:text-on-dark-soft text-sm bg-canvas dark:bg-surface-dark leading-normal font-normal font-sans;
+		color: var(--body);
+		background-color: var(--canvas);
+		-webkit-font-smoothing: antialiased;
+	}
+
+	h1,
+	.h1 {
+		@apply text-4xl font-semibold text-ink dark:text-on-dark;
+		letter-spacing: -1.08px;
+	}
+
+	h2,
+	.h2 {
+		@apply text-3xl font-semibold text-ink dark:text-on-dark;
+		letter-spacing: -0.84px;
+	}
+
+	h3,
+	.h3 {
+		@apply text-2xl font-semibold text-ink dark:text-on-dark;
+		letter-spacing: -0.5px;
+	}
+
+	h4,
+	.h4 {
+		@apply text-xl font-semibold text-ink dark:text-on-dark;
+	}
+
+	h5,
+	.h5 {
+		@apply text-lg font-semibold text-ink dark:text-on-dark;
+	}
+
+	h6,
+	.h6 {
+		@apply text-base font-semibold text-ink dark:text-on-dark;
+	}
+
+	hr {
+		@apply border-hairline dark:border-hairline-strong;
+	}
+
+	code, pre {
+		font-family: 'JetBrains Mono', 'Fira Code', monospace;
+	}
+}
+
+@layer components {
+	.heading-text {
+		@apply text-ink dark:text-on-dark;
+	}
+
+	/* Expo Design Components */
+	.top-nav {
+		background-color: var(--canvas);
+		color: var(--ink);
+		height: 64px;
+		font-size: 14px;
+		font-weight: 500;
+	}
+
+	.btn-expo-primary {
+		background-color: var(--primary);
+		color: var(--on-primary);
+		font-size: 14px;
+		font-weight: 500;
+		line-height: 1.0;
+		border-radius: 8px;
+		padding: 10px 18px;
+		height: 40px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		transition: background-color 0.15s ease;
+	}
+
+	.btn-expo-primary:hover,
+	.btn-expo-primary:active {
+		background-color: var(--primary-active);
+	}
+
+	.btn-expo-secondary {
+		background-color: var(--surface-card);
+		color: var(--ink);
+		font-size: 14px;
+		font-weight: 500;
+		line-height: 1.0;
+		border-radius: 8px;
+		border: 1px solid var(--hairline-strong);
+		padding: 9px 17px;
+		height: 40px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.btn-expo-tertiary {
+		background-color: transparent;
+		color: var(--text-link);
+		font-size: 14px;
+		font-weight: 500;
+		display: inline-flex;
+		align-items: center;
+	}
+
+	.hero-sky-wash {
+		background: radial-gradient(ellipse 80% 60% at 50% 0%, var(--gradient-sky-light) 0%, var(--gradient-sky-mid) 40%, transparent 75%);
+	}
+
+	.card-expo-feature {
+		background-color: var(--surface-card);
+		color: var(--ink);
+		border-radius: 12px;
+		border: 1px solid var(--hairline-strong);
+		padding: 24px;
+	}
+
+	.card-expo-dark {
+		background-color: var(--surface-dark);
+		color: var(--on-dark);
+		border-radius: 12px;
+		padding: 24px;
+	}
+
+	.badge-expo-pill {
+		background-color: var(--surface-strong);
+		color: var(--ink);
+		font-size: 11px;
+		font-weight: 600;
+		line-height: 1.4;
+		letter-spacing: 0.88px;
+		text-transform: uppercase;
+		border-radius: 9999px;
+		padding: 4px 10px;
+		display: inline-block;
+	}
+
+	.code-expo-block {
+		background-color: var(--surface-dark);
+		color: var(--on-dark);
+		font-family: 'JetBrains Mono', 'Fira Code', monospace;
+		font-size: 13px;
+		line-height: 1.5;
+		border-radius: 12px;
+		padding: 20px;
+	}
+}
+
+@layer utilities {
+	/* Typography Utilities */
+	.text-display-mega {
+		font-size: 64px;
+		font-weight: 600;
+		line-height: 1.05;
+		letter-spacing: -1.92px;
+	}
+
+	.text-display-xl {
+		font-size: 48px;
+		font-weight: 600;
+		line-height: 1.1;
+		letter-spacing: -1.44px;
+	}
+
+	.text-display-lg {
+		font-size: 36px;
+		font-weight: 600;
+		line-height: 1.15;
+		letter-spacing: -1.08px;
+	}
+
+	.text-display-md {
+		font-size: 28px;
+		font-weight: 600;
+		line-height: 1.2;
+		letter-spacing: -0.84px;
+	}
+
+	.text-display-sm {
+		font-size: 22px;
+		font-weight: 600;
+		line-height: 1.25;
+		letter-spacing: -0.5px;
+	}
+
+	.text-title-md {
+		font-size: 18px;
+		font-weight: 600;
+		line-height: 1.4;
+		letter-spacing: 0;
+	}
+
+	.text-title-sm {
+		font-size: 16px;
+		font-weight: 600;
+		line-height: 1.4;
+		letter-spacing: 0;
+	}
+
+	.text-body-md {
+		font-size: 16px;
+		font-weight: 400;
+		line-height: 1.5;
+		letter-spacing: 0;
+	}
+
+	.text-body-sm {
+		font-size: 14px;
+		font-weight: 400;
+		line-height: 1.5;
+		letter-spacing: 0;
+	}
+
+	.text-caption {
+		font-size: 13px;
+		font-weight: 400;
+		line-height: 1.4;
+		letter-spacing: 0;
+	}
+
+	.text-caption-uppercase {
+		font-size: 11px;
+		font-weight: 600;
+		line-height: 1.4;
+		letter-spacing: 0.88px;
+		text-transform: uppercase;
+	}
+}
