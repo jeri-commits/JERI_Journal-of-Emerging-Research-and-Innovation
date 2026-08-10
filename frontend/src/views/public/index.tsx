@@ -1,3 +1,3 @@
-import AboutJournal from './About'
+import Home from './Home'
 
-export default AboutJournal
+export default Home
