@@ -5,11 +5,11 @@
 @layer theme {
 	:root {
 		/* Brand & Accent */
-		--primary: #000000;
-		--primary-active: #1a1a1a;
-		--primary-deep: #000000;
-		--primary-mild: #171717;
-		--primary-subtle: rgba(0, 0, 0, 0.05);
+		--primary: #0d74ce;
+		--primary-active: #0a5fa9;
+		--primary-deep: #084c87;
+		--primary-mild: #1e87e5;
+		--primary-subtle: rgba(13, 116, 206, 0.1);
 		--text-link: #0d74ce;
 		--text-link-secondary: #476cff;
 		--accent-link-bright: #47c2ff;
@@ -71,11 +71,11 @@
 	}
 
 	.dark {
-		--primary: #ffffff;
-		--primary-active: #e5e5e5;
-		--primary-deep: #ffffff;
-		--primary-mild: #e5e5e5;
-		--primary-subtle: rgba(255, 255, 255, 0.1);
+		--primary: #0d74ce;
+		--primary-active: #0a5fa9;
+		--primary-deep: #084c87;
+		--primary-mild: #1e87e5;
+		--primary-subtle: rgba(13, 116, 206, 0.2);
 		
 		--canvas: #171717;
 		--canvas-soft: #1a1a1a;
@@ -89,7 +89,7 @@
 		--body-strong: #ffffff;
 		--muted: #808080;
 		--muted-soft: #525252;
-		--on-primary: #171717;
+		--on-primary: #ffffff;
 
 		--hairline: #262626;
 		--hairline-soft: #1f1f1f;

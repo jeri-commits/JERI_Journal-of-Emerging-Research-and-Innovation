@@ -2,13 +2,69 @@
 <html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8" />
-  <link rel="shortcut icon" href="/img/logo/logo-full.png" />
+  <link rel="shortcut icon" href="/img/logo/favicon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="JERI - Journal of Emerging Research and Innovation" />
   <title>JERI - Journal of Emerging Research and Innovation</title>
+  <style>
+    /* Shutter Initial App Loader */
+    #app-initial-loader {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #ffffff;
+      font-family: system-ui, -apple-system, sans-serif;
+      z-index: 99999;
+      user-select: none;
+      animation: shutter-down 0.5s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+    }
+    #app-initial-loader .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background-color: #0d74ce;
+      box-shadow: 0 0 12px #0d74ce;
+    }
+    #app-initial-loader img {
+      height: 96px;
+      width: auto;
+      max-width: 360px;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.08));
+      animation: logo-scale 1.5s infinite ease-in-out;
+    }
+    #app-initial-loader .text-caption {
+      margin-top: 24px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #4b5563;
+    }
+    @keyframes shutter-down {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(0%); }
+    }
+    @keyframes logo-scale {
+      0%, 100% { transform: scale(1); opacity: 0.95; }
+      50% { transform: scale(1.03); opacity: 1; }
+    }
+  </style>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <div id="app-initial-loader">
+      <div class="top-bar"></div>
+      <img src="/img/logo/jeri-logo.png" alt="JERI Journal" />
+      <div class="text-caption">Journal of Emerging Research & Innovation</div>
+    </div>
+  </div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>

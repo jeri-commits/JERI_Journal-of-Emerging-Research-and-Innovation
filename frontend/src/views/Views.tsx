@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import Loading from '@/components/shared/Loading'
+import PageLoader from '@/components/shared/PageLoader'
 import AllRoutes from '@/components/route/AllRoutes'
 import type { LayoutType } from '@/@types/theme'
 
@@ -10,7 +10,7 @@ interface ViewsProps {
 
 const Views = (props: ViewsProps) => {
     return (
-        <Suspense fallback={<Loading loading={true} className="w-full" />}>
+        <Suspense fallback={<PageLoader />}>
             <AllRoutes {...props} />
         </Suspense>
     )

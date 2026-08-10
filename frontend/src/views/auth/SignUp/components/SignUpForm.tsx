@@ -2,6 +2,8 @@ import { useState } from 'react'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import { FormItem, Form } from '@/components/ui/Form'
+import PasswordInput from '@/components/shared/PasswordInput'
+import classNames from '@/utils/classNames'
 import { useAuth } from '@/auth'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -23,23 +25,21 @@ type SignUpFormSchema = {
 
 const validationSchema: ZodType<SignUpFormSchema> = z
     .object({
-        email: z.string({ required_error: 'Please enter your email' }),
-        userName: z.string({ required_error: 'Please enter your name' }),
-        password: z.string({ required_error: 'Password Required' }),
+        userName: z.string({ required_error: 'Please enter your full name' }).min(2, { message: 'Name must be at least 2 characters' }),
+        email: z.string({ required_error: 'Please enter your email' }).email({ message: 'Please enter a valid email address' }),
+        password: z.string({ required_error: 'Password Required' }).min(6, { message: 'Password must be at least 6 characters' }),
         confirmPassword: z.string({
             required_error: 'Confirm Password Required',
         }),
     })
     .refine((data) => data.password === data.confirmPassword, {
-        message: 'Password not match',
+        message: 'Passwords do not match',
         path: ['confirmPassword'],
     })
 
 const SignUpForm = (props: SignUpFormProps) => {
     const { disableSubmit = false, className, setMessage } = props
-
     const [isSubmitting, setSubmitting] = useState<boolean>(false)
-
     const { signUp } = useAuth()
 
     const {
@@ -47,6 +47,12 @@ const SignUpForm = (props: SignUpFormProps) => {
         formState: { errors },
         control,
     } = useForm<SignUpFormSchema>({
+        defaultValues: {
+            userName: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+        },
         resolver: zodResolver(validationSchema),
     })
 
@@ -60,18 +66,19 @@ const SignUpForm = (props: SignUpFormProps) => {
             if (result?.status === 'failed') {
                 setMessage?.(result.message)
             }
-
-            setSubmitting(false)
         }
+
+        setSubmitting(false)
     }
 
     return (
-        <div className={className}>
-            <Form onSubmit={handleSubmit(onSignUp)}>
+        <div className={classNames('w-full', className)}>
+            <Form onSubmit={handleSubmit(onSignUp)} className="space-y-2.5 w-full">
                 <FormItem
-                    label="User name"
+                    label="Full Name"
                     invalid={Boolean(errors.userName)}
                     errorMessage={errors.userName?.message}
+                    className="mb-2"
                 >
                     <Controller
                         name="userName"
@@ -79,17 +86,21 @@ const SignUpForm = (props: SignUpFormProps) => {
                         render={({ field }) => (
                             <Input
                                 type="text"
-                                placeholder="User Name"
-                                autoComplete="off"
+                                placeholder="Enter your full name"
+                                autoComplete="name"
+                                size="sm"
+                                className="h-9 text-xs"
                                 {...field}
                             />
                         )}
                     />
                 </FormItem>
+
                 <FormItem
-                    label="Email"
+                    label="Email Address"
                     invalid={Boolean(errors.email)}
                     errorMessage={errors.email?.message}
+                    className="mb-2"
                 >
                     <Controller
                         name="email"
@@ -97,56 +108,69 @@ const SignUpForm = (props: SignUpFormProps) => {
                         render={({ field }) => (
                             <Input
                                 type="email"
-                                placeholder="Email"
-                                autoComplete="off"
+                                placeholder="Enter your email address"
+                                autoComplete="email"
+                                size="sm"
+                                className="h-9 text-xs"
                                 {...field}
                             />
                         )}
                     />
                 </FormItem>
+
                 <FormItem
                     label="Password"
                     invalid={Boolean(errors.password)}
                     errorMessage={errors.password?.message}
+                    className="mb-2"
                 >
                     <Controller
                         name="password"
                         control={control}
                         render={({ field }) => (
-                            <Input
+                            <PasswordInput
                                 type="password"
-                                autoComplete="off"
-                                placeholder="Password"
+                                placeholder="Create a password"
+                                autoComplete="new-password"
+                                size="sm"
+                                className="h-9 text-xs"
                                 {...field}
                             />
                         )}
                     />
                 </FormItem>
+
                 <FormItem
                     label="Confirm Password"
                     invalid={Boolean(errors.confirmPassword)}
                     errorMessage={errors.confirmPassword?.message}
+                    className="mb-2"
                 >
                     <Controller
                         name="confirmPassword"
                         control={control}
                         render={({ field }) => (
-                            <Input
+                            <PasswordInput
                                 type="password"
-                                autoComplete="off"
-                                placeholder="Confirm Password"
+                                placeholder="Confirm your password"
+                                autoComplete="new-password"
+                                size="sm"
+                                className="h-9 text-xs"
                                 {...field}
                             />
                         )}
                     />
                 </FormItem>
+
                 <Button
-                    block
                     loading={isSubmitting}
-                    variant="solid"
+                    disabled={isSubmitting}
+                    variant="default"
                     type="submit"
+                    size="sm"
+                    className="w-full h-9 bg-primary text-on-primary hover:bg-primary-active font-bold rounded-xl shadow-xs text-xs mt-1"
                 >
-                    {isSubmitting ? 'Creating Account...' : 'Sign Up'}
+                    {isSubmitting ? 'Creating Account...' : 'Register Account'}
                 </Button>
             </Form>
         </div>

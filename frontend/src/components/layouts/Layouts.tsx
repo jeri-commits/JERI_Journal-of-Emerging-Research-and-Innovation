@@ -1,5 +1,7 @@
 import { Suspense } from 'react'
 import Loading from '@/components/shared/Loading'
+import PageLoader from '@/components/shared/PageLoader'
+import RouteLoader from '@/components/shared/RouteLoader'
 import type { CommonProps } from '@/@types/common'
 import { useAuth } from '@/auth'
 import { useThemeStore } from '@/store/themeStore'
@@ -33,27 +35,24 @@ const Layout = ({ children }: CommonProps) => {
     const isAuthorPath = pathname.startsWith('/author')
 
     return (
-        <Suspense
-            fallback={
-                <div className="flex flex-auto flex-col h-[100vh]">
-                    <Loading loading={true} />
-                </div>
-            }
-        >
-            {isPublicPath ? (
-                <PublicLayout>{children}</PublicLayout>
-            ) : isAdminPath ? (
-                <AdminLayout>{children}</AdminLayout>
-            ) : isAuthorPath ? (
-                <AuthorLayout>{children}</AuthorLayout>
-            ) : authenticated ? (
-                <PostLoginLayout layoutType={layoutType}>
-                    {children}
-                </PostLoginLayout>
-            ) : (
-                <PreLoginLayout>{children}</PreLoginLayout>
-            )}
-        </Suspense>
+        <>
+            <RouteLoader />
+            <Suspense fallback={<PageLoader />}>
+                {isPublicPath ? (
+                    <PublicLayout>{children}</PublicLayout>
+                ) : isAdminPath ? (
+                    <AdminLayout>{children}</AdminLayout>
+                ) : isAuthorPath ? (
+                    <AuthorLayout>{children}</AuthorLayout>
+                ) : authenticated ? (
+                    <PostLoginLayout layoutType={layoutType}>
+                        {children}
+                    </PostLoginLayout>
+                ) : (
+                    <PreLoginLayout>{children}</PreLoginLayout>
+                )}
+            </Suspense>
+        </>
     )
 }
 
