@@ -53,12 +53,6 @@ export const publicRoutes: Routes = [
         authority: [],
     },
     {
-        key: 'publicAbout',
-        path: '/about',
-        component: lazy(() => import('@/views/public/About')),
-        authority: [],
-    },
-    {
         key: 'accessDenied',
         path: '/access-denied',
         component: lazy(() => import('@/views/AccessDenied')),
@@ -97,7 +91,7 @@ export const protectedRoutes: Routes = [
     {
         key: 'home',
         path: '/home',
-        component: lazy(() => import('@/views/Home')),
+        component: lazy(() => import('@/views/public/Home')),
         authority: ['author', 'admin'],
     },
 ]
