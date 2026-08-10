@@ -35,6 +35,14 @@ const AdminLayout: React.FC<CommonProps> = ({ children }) => {
         { label: 'Issue Releases', path: '/admin#issues', icon: BookOpen },
     ]
 
+    const isNavActive = (path: string) => {
+        const currentFull = location.pathname + location.hash
+        if (path.includes('#')) {
+            return currentFull === path
+        }
+        return location.pathname === path && !location.hash
+    }
+
     return (
         <LayoutBase type={LAYOUT_COLLAPSIBLE_SIDE} className="min-h-screen bg-canvas text-ink flex flex-col font-sans">
             {/* Admin Header */}
@@ -44,7 +52,8 @@ const AdminLayout: React.FC<CommonProps> = ({ children }) => {
                         variant="ghost" 
                         size="icon" 
                         onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="text-body hover:text-ink"
+                        className="text-body hover:text-ink focus:outline-none"
+                        aria-label="Toggle Navigation Sidebar"
                     >
                         {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                     </Button>
@@ -89,15 +98,25 @@ const AdminLayout: React.FC<CommonProps> = ({ children }) => {
             </header>
 
             <div className="flex flex-1 relative">
+                {/* Mobile Backdrop Overlay */}
+                {sidebarOpen && (
+                    <div 
+                        className="fixed inset-0 top-16 bg-black/50 backdrop-blur-xs z-30 md:hidden transition-opacity"
+                        onClick={() => setSidebarOpen(false)}
+                    />
+                )}
+
                 {/* Admin Sidebar Navigation */}
                 <aside 
                     className={`fixed md:sticky top-16 z-30 h-[calc(100vh-4rem)] bg-surface-card dark:bg-surface-dark-elevated border-r border-hairline-strong transition-all duration-300 flex flex-col justify-between ${
-                        sidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full md:w-16 md:translate-x-0'
-                    } overflow-hidden`}
+                        sidebarOpen 
+                            ? 'w-64 translate-x-0' 
+                            : '-translate-x-full md:translate-x-0 md:w-16'
+                    } overflow-y-auto min-h-0`}
                 >
-                    <div className="p-4 space-y-6">
+                    <div className={sidebarOpen ? "p-4 space-y-6" : "p-2 py-4 space-y-6"}>
                         {/* Sidebar Header Badge */}
-                        {sidebarOpen && (
+                        {sidebarOpen ? (
                             <div className="p-3 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800/50 space-y-1">
                                 <div className="text-xs font-semibold text-purple-900 dark:text-purple-300 flex items-center gap-1">
                                     <Sparkles className="h-3.5 w-3.5" />
@@ -107,27 +126,43 @@ const AdminLayout: React.FC<CommonProps> = ({ children }) => {
                                     {adminName}
                                 </div>
                             </div>
+                        ) : (
+                            <div className="flex justify-center" title={`Editorial Board: ${adminName}`}>
+                                <div className="w-9 h-9 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/50 text-purple-700 dark:text-purple-300 rounded-lg flex items-center justify-center font-bold text-xs">
+                                    <Sparkles className="h-4 w-4" />
+                                </div>
+                            </div>
                         )}
 
                         {/* Sidebar Nav Items */}
-                        <nav className="space-y-1">
+                        <nav className="space-y-1.5">
                             {navItems.map((item) => {
                                 const Icon = item.icon
-                                const isActive = location.pathname === item.path
+                                const isActive = isNavActive(item.path)
 
                                 return (
                                     <Link
                                         key={item.label}
                                         to={item.path}
-                                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                                        title={!sidebarOpen ? item.label : undefined}
+                                        onClick={() => {
+                                            if (window.innerWidth < 768) {
+                                                setSidebarOpen(false)
+                                            }
+                                        }}
+                                        className={`flex items-center rounded-lg text-sm font-medium transition-colors ${
+                                            sidebarOpen 
+                                                ? 'gap-3 px-3 py-2.5' 
+                                                : 'justify-center p-2.5'
+                                        } ${
                                             isActive
-                                                ? 'bg-primary text-on-primary font-semibold'
+                                                ? 'bg-primary text-on-primary font-semibold shadow-xs'
                                                 : 'text-body hover:bg-surface-strong hover:text-ink'
                                         }`}
                                     >
                                         <Icon className="h-4 w-4 shrink-0" />
                                         {sidebarOpen && <span className="truncate flex-1">{item.label}</span>}
-                                        {sidebarOpen && isActive && <ChevronRight className="h-4 w-4" />}
+                                        {sidebarOpen && isActive && <ChevronRight className="h-4 w-4 shrink-0" />}
                                     </Link>
                                 )
                             })}
@@ -135,14 +170,22 @@ const AdminLayout: React.FC<CommonProps> = ({ children }) => {
                     </div>
 
                     {/* Sidebar Footer Link */}
-                    {sidebarOpen && (
-                        <div className="p-4 border-t border-hairline">
-                            <Link to="/" className="text-xs text-text-link hover:underline flex items-center justify-between">
-                                <span>Back to Main Journal</span>
-                                <ExternalLink className="h-3 w-3" />
-                            </Link>
-                        </div>
-                    )}
+                    <div className={sidebarOpen ? "p-4 border-t border-hairline" : "p-2 py-3 border-t border-hairline flex justify-center"}>
+                        <Link 
+                            to="/" 
+                            title={!sidebarOpen ? "Back to Main Journal" : undefined}
+                            className="text-xs text-text-link hover:underline flex items-center justify-between gap-1"
+                        >
+                            {sidebarOpen ? (
+                                <>
+                                    <span>Back to Main Journal</span>
+                                    <ExternalLink className="h-3 w-3" />
+                                </>
+                            ) : (
+                                <ExternalLink className="h-4 w-4" />
+                            )}
+                        </Link>
+                    </div>
                 </aside>
 
                 {/* Main Content Area */}
