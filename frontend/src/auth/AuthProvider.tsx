@@ -1,18 +1,13 @@
-import { useRef, useImperativeHandle } from 'react'
+import { useEffect, useRef, useState, useImperativeHandle } from 'react'
 import AuthContext from './AuthContext'
 import appConfig from '@/configs/app.config'
-import { useSessionUser, useToken } from '@/store/authStore'
-import { apiSignIn, apiSignOut, apiSignUp } from '@/services/AuthService'
+import { supabase } from '@/configs/supabase.config'
+import { getProfile } from '@/services/supabase/profiles'
+import { useSessionUser } from '@/store/authStore'
+import { apiSignUp, apiSignIn, apiSignOut } from '@/services/AuthService'
 import { REDIRECT_URL_KEY } from '@/constants/app.constant'
 import { useNavigate } from 'react-router-dom'
-import type {
-    SignInCredential,
-    SignUpCredential,
-    AuthResult,
-    OauthSignInCallbackPayload,
-    User,
-    Token,
-} from '@/@types/auth'
+import type { AuthResult, User } from '@/@types/auth'
 import type { ReactNode, Ref } from 'react'
 import type { NavigateFunction } from 'react-router-dom'
 
@@ -25,25 +20,29 @@ export type IsolatedNavigatorRef = {
 const IsolatedNavigator = ({ ref }: { ref: Ref<IsolatedNavigatorRef> }) => {
     const navigate = useNavigate()
 
-    useImperativeHandle(ref, () => {
-        return {
-            navigate,
-        }
-    }, [navigate])
+    useImperativeHandle(
+        ref,
+        () => {
+            return {
+                navigate,
+            }
+        },
+        [navigate],
+    )
 
     return <></>
 }
 
 function AuthProvider({ children }: AuthProviderProps) {
-    const signedIn = useSessionUser((state) => state.session.signedIn)
+    const [loading, setLoading] = useState(true)
     const user = useSessionUser((state) => state.user)
     const setUser = useSessionUser((state) => state.setUser)
     const setSessionSignedIn = useSessionUser(
         (state) => state.setSessionSignedIn,
     )
-    const { token, setToken } = useToken()
+    const signedIn = useSessionUser((state) => state.session.signedIn)
 
-    const authenticated = Boolean(token && signedIn)
+    const authenticated = signedIn
 
     const navigatorRef = useRef<IsolatedNavigatorRef>(null)
 
@@ -63,69 +62,89 @@ function AuthProvider({ children }: AuthProviderProps) {
         } else if (authorities.includes('author')) {
             navigatorRef.current?.navigate('/author')
         } else {
-            navigatorRef.current?.navigate(appConfig.authenticatedEntryPath)
+            navigatorRef.current?.navigate(appConfig.unAuthenticatedEntryPath)
         }
     }
 
-    const handleSignIn = (tokens: Token, user?: User) => {
-        setToken(tokens.accessToken)
-        setSessionSignedIn(true)
+    useEffect(() => {
+        let ignore = false
 
-        if (user) {
-            setUser(user)
-        }
-    }
-
-    const handleSignOut = () => {
-        setToken('')
-        setUser({})
-        setSessionSignedIn(false)
-    }
-
-    const signIn = async (values: SignInCredential): AuthResult => {
-        try {
-            const resp = await apiSignIn(values)
-            if (resp) {
-                handleSignIn({ accessToken: resp.token }, resp.user)
-                redirect(resp.user)
-                return {
-                    status: 'success',
-                    message: '',
+        const syncUser = async (
+            sessionUser: { id: string; email?: string | null } | undefined,
+        ) => {
+            if (!sessionUser) {
+                if (!ignore) {
+                    setUser({})
+                    setSessionSignedIn(false)
                 }
+                return
             }
-            return {
-                status: 'failed',
-                message: 'Unable to sign in',
-            }
+
+            const profile = await getProfile(sessionUser.id)
+
+            if (ignore) return
+
+            setUser({
+                userId: sessionUser.id,
+                email: profile.email || sessionUser.email,
+                userName: profile.full_name || undefined,
+                role: profile.role,
+                authority: profile.role ? [profile.role] : [],
+            })
+            setSessionSignedIn(true)
+        }
+
+        supabase.auth.getSession().then(({ data }) => {
+            syncUser(data.session?.user).finally(() => {
+                if (!ignore) setLoading(false)
+            })
+        })
+
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+            syncUser(session?.user)
+        })
+
+        return () => {
+            ignore = true
+            subscription.unsubscribe()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    const signUp = async (
+        email: string,
+        password: string,
+        username?: string,
+    ): AuthResult => {
+        try {
+            const signedInUser = await apiSignUp(email, password, username)
+            setUser(signedInUser)
+            setSessionSignedIn(true)
+            redirect(signedInUser)
+            return { status: 'success', message: '' }
             // eslint-disable-next-line  @typescript-eslint/no-explicit-any
         } catch (errors: any) {
             return {
                 status: 'failed',
-                message: errors?.response?.data?.message || errors.toString(),
+                message: errors?.message || 'Unable to create your account.',
             }
         }
     }
 
-    const signUp = async (values: SignUpCredential): AuthResult => {
+    const signIn = async (email: string, password: string): AuthResult => {
         try {
-            const resp = await apiSignUp(values)
-            if (resp) {
-                handleSignIn({ accessToken: resp.token }, resp.user)
-                redirect()
-                return {
-                    status: 'success',
-                    message: '',
-                }
-            }
-            return {
-                status: 'failed',
-                message: 'Unable to sign up',
-            }
+            const signedInUser = await apiSignIn(email, password)
+            setUser(signedInUser)
+            setSessionSignedIn(true)
+            redirect(signedInUser)
+            return { status: 'success', message: '' }
             // eslint-disable-next-line  @typescript-eslint/no-explicit-any
         } catch (errors: any) {
             return {
                 status: 'failed',
-                message: errors?.response?.data?.message || errors.toString(),
+                message: errors?.message || 'Invalid email or password.',
             }
         }
     }
@@ -134,28 +153,21 @@ function AuthProvider({ children }: AuthProviderProps) {
         try {
             await apiSignOut()
         } finally {
-            handleSignOut()
+            setUser({})
+            setSessionSignedIn(false)
             navigatorRef.current?.navigate(appConfig.unAuthenticatedEntryPath)
         }
-    }
-    const oAuthSignIn = (
-        callback: (payload: OauthSignInCallbackPayload) => void,
-    ) => {
-        callback({
-            onSignIn: handleSignIn,
-            redirect,
-        })
     }
 
     return (
         <AuthContext.Provider
             value={{
                 authenticated,
+                loading,
                 user,
-                signIn,
                 signUp,
+                signIn,
                 signOut,
-                oAuthSignIn,
             }}
         >
             {children}
