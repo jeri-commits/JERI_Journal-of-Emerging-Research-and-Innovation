@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import { FormItem, Form } from '@/components/ui/Form'
@@ -10,11 +11,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import type { ZodType } from 'zod'
 import type { CommonProps } from '@/@types/common'
-import type { ReactNode } from 'react'
 
 interface SignInFormProps extends CommonProps {
     disableSubmit?: boolean
-    passwordHint?: string | ReactNode
     setMessage?: (message: string) => void
 }
 
@@ -34,7 +33,7 @@ const validationSchema: ZodType<SignInFormSchema> = z.object({
 
 const SignInForm = (props: SignInFormProps) => {
     const [isSubmitting, setSubmitting] = useState<boolean>(false)
-    const { disableSubmit = false, className, setMessage, passwordHint } = props
+    const { disableSubmit = false, className, setMessage } = props
 
     const {
         handleSubmit,
@@ -55,7 +54,7 @@ const SignInForm = (props: SignInFormProps) => {
 
         if (!disableSubmit) {
             setSubmitting(true)
-            const result = await signIn({ email, password })
+            const result = await signIn(email, password)
 
             if (result?.status === 'failed') {
                 setMessage?.(result.message)
@@ -80,7 +79,7 @@ const SignInForm = (props: SignInFormProps) => {
                         render={({ field }) => (
                             <Input
                                 type="email"
-                                placeholder="Enter your registered email"
+                                placeholder="Enter your email"
                                 autoComplete="email"
                                 size="sm"
                                 className="h-9 text-xs"
@@ -90,22 +89,22 @@ const SignInForm = (props: SignInFormProps) => {
                     />
                 </FormItem>
 
+                <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-ink">Password</span>
+                    <Link to="/forgot-password" className="text-[11px] font-bold text-primary hover:underline">
+                        Forgot password?
+                    </Link>
+                </div>
                 <FormItem
-                    label="Password"
                     invalid={Boolean(errors.password)}
                     errorMessage={errors.password?.message}
-                    className={classNames(
-                        'mb-1',
-                        errors.password?.message ? 'mb-2' : '',
-                    )}
+                    className="mb-1 -mt-1"
                 >
                     <Controller
                         name="password"
                         control={control}
-                        rules={{ required: true }}
                         render={({ field }) => (
                             <PasswordInput
-                                type="password"
                                 placeholder="Enter your password"
                                 autoComplete="current-password"
                                 size="sm"
@@ -115,8 +114,6 @@ const SignInForm = (props: SignInFormProps) => {
                         )}
                     />
                 </FormItem>
-
-                {passwordHint}
 
                 <Button
                     loading={isSubmitting}

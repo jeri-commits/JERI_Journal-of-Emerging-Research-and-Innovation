@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Alert from '@/components/ui/Alert'
 import SignInForm from './components/SignInForm'
-import ActionLink from '@/components/shared/ActionLink'
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
 import { ArrowLeft, BookOpen, GraduationCap, Atom, ScrollText, Globe, Sparkles } from 'lucide-react'
 
@@ -71,12 +70,12 @@ export const SignIn: React.FC = () => {
 
             {/* Main Single-View Auth Card (95% See-Through Form Glassmorphism) */}
             <div className="w-full flex-1 flex flex-col items-center justify-center -mt-2 md:-mt-4 my-1 z-10 relative">
-                <div className="w-[410px] max-w-[95vw] shrink-0 bg-white/5 dark:bg-black/20 backdrop-blur-md border border-white/40 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] rounded-3xl p-5 md:p-6 space-y-3.5 relative mx-auto">
+                <div className="w-[410px] max-w-[95vw] shrink-0 bg-white/80 dark:bg-gray-900/70 backdrop-blur-xl border border-white/60 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] rounded-3xl p-5 md:p-6 space-y-3.5 relative mx-auto">
                     
                     {/* Card Title & Subtitle */}
                     <div className="text-center space-y-0.5">
                         <h2 className="text-lg font-extrabold text-ink tracking-tight">Welcome Back</h2>
-                        <p className="text-xs text-body font-medium">Please enter your credentials to sign in</p>
+                        <p className="text-xs text-body font-medium">Sign in with your email and password</p>
                     </div>
 
                     {/* Timeout Alert Message */}
@@ -87,25 +86,12 @@ export const SignIn: React.FC = () => {
                     )}
 
                     {/* Sign In Form */}
-                    <SignInForm 
-                        setMessage={setMessage}
-                        passwordHint={
-                            <div className="text-right mt-0.5 mb-1">
-                                <ActionLink
-                                    to="/forgot-password"
-                                    className="text-[11px] font-semibold text-primary hover:underline"
-                                    themeColor={false}
-                                >
-                                    Forgot password?
-                                </ActionLink>
-                            </div>
-                        }
-                    />
+                    <SignInForm setMessage={setMessage} />
 
                     {/* Inside-Card Footer Actions */}
                     <div className="pt-2 border-t border-hairline/40 flex flex-col items-center gap-2 text-[11px] text-body">
                         <div>
-                            <span>Don't have an account yet? </span>
+                            <span>Don&apos;t have an account yet? </span>
                             <Link to="/sign-up" className="font-bold text-primary hover:underline ml-0.5">
                                 Create an account
                             </Link>

@@ -17,19 +17,23 @@ interface SignUpFormProps extends CommonProps {
 }
 
 type SignUpFormSchema = {
-    userName: string
-    password: string
+    username: string
     email: string
+    password: string
     confirmPassword: string
 }
 
 const validationSchema: ZodType<SignUpFormSchema> = z
     .object({
-        userName: z.string({ required_error: 'Please enter your full name' }).min(2, { message: 'Name must be at least 2 characters' }),
-        email: z.string({ required_error: 'Please enter your email' }).email({ message: 'Please enter a valid email address' }),
-        password: z.string({ required_error: 'Password Required' }).min(6, { message: 'Password must be at least 6 characters' }),
+        username: z.string().optional().default(''),
+        email: z
+            .string({ required_error: 'Please enter your email' })
+            .email({ message: 'Please enter a valid email address' }),
+        password: z
+            .string({ required_error: 'Please enter a password' })
+            .min(8, { message: 'Password must be at least 8 characters' }),
         confirmPassword: z.string({
-            required_error: 'Confirm Password Required',
+            required_error: 'Please confirm your password',
         }),
     })
     .refine((data) => data.password === data.confirmPassword, {
@@ -38,9 +42,8 @@ const validationSchema: ZodType<SignUpFormSchema> = z
     })
 
 const SignUpForm = (props: SignUpFormProps) => {
-    const { disableSubmit = false, className, setMessage } = props
     const [isSubmitting, setSubmitting] = useState<boolean>(false)
-    const { signUp } = useAuth()
+    const { disableSubmit = false, className, setMessage } = props
 
     const {
         handleSubmit,
@@ -48,7 +51,7 @@ const SignUpForm = (props: SignUpFormProps) => {
         control,
     } = useForm<SignUpFormSchema>({
         defaultValues: {
-            userName: '',
+            username: '',
             email: '',
             password: '',
             confirmPassword: '',
@@ -56,12 +59,14 @@ const SignUpForm = (props: SignUpFormProps) => {
         resolver: zodResolver(validationSchema),
     })
 
+    const { signUp } = useAuth()
+
     const onSignUp = async (values: SignUpFormSchema) => {
-        const { userName, password, email } = values
+        const { username, email, password } = values
 
         if (!disableSubmit) {
             setSubmitting(true)
-            const result = await signUp({ userName, password, email })
+            const result = await signUp(email, password, username)
 
             if (result?.status === 'failed') {
                 setMessage?.(result.message)
@@ -73,21 +78,19 @@ const SignUpForm = (props: SignUpFormProps) => {
 
     return (
         <div className={classNames('w-full', className)}>
-            <Form onSubmit={handleSubmit(onSignUp)} className="space-y-2.5 w-full">
+            <Form onSubmit={handleSubmit(onSignUp)} className="space-y-2 w-full">
                 <FormItem
-                    label="Full Name"
-                    invalid={Boolean(errors.userName)}
-                    errorMessage={errors.userName?.message}
-                    className="mb-2"
+                    label="Username (optional)"
+                    invalid={Boolean(errors.username)}
+                    errorMessage={errors.username?.message}
+                    className="mb-1.5"
                 >
                     <Controller
-                        name="userName"
+                        name="username"
                         control={control}
                         render={({ field }) => (
                             <Input
-                                type="text"
-                                placeholder="Enter your full name"
-                                autoComplete="name"
+                                placeholder="How should we address you?"
                                 size="sm"
                                 className="h-9 text-xs"
                                 {...field}
@@ -100,7 +103,7 @@ const SignUpForm = (props: SignUpFormProps) => {
                     label="Email Address"
                     invalid={Boolean(errors.email)}
                     errorMessage={errors.email?.message}
-                    className="mb-2"
+                    className="mb-1.5"
                 >
                     <Controller
                         name="email"
@@ -108,7 +111,7 @@ const SignUpForm = (props: SignUpFormProps) => {
                         render={({ field }) => (
                             <Input
                                 type="email"
-                                placeholder="Enter your email address"
+                                placeholder="Enter your email"
                                 autoComplete="email"
                                 size="sm"
                                 className="h-9 text-xs"
@@ -122,15 +125,14 @@ const SignUpForm = (props: SignUpFormProps) => {
                     label="Password"
                     invalid={Boolean(errors.password)}
                     errorMessage={errors.password?.message}
-                    className="mb-2"
+                    className="mb-1.5"
                 >
                     <Controller
                         name="password"
                         control={control}
                         render={({ field }) => (
                             <PasswordInput
-                                type="password"
-                                placeholder="Create a password"
+                                placeholder="At least 8 characters"
                                 autoComplete="new-password"
                                 size="sm"
                                 className="h-9 text-xs"
@@ -144,15 +146,14 @@ const SignUpForm = (props: SignUpFormProps) => {
                     label="Confirm Password"
                     invalid={Boolean(errors.confirmPassword)}
                     errorMessage={errors.confirmPassword?.message}
-                    className="mb-2"
+                    className="mb-1"
                 >
                     <Controller
                         name="confirmPassword"
                         control={control}
                         render={({ field }) => (
                             <PasswordInput
-                                type="password"
-                                placeholder="Confirm your password"
+                                placeholder="Re-enter your password"
                                 autoComplete="new-password"
                                 size="sm"
                                 className="h-9 text-xs"
@@ -170,7 +171,7 @@ const SignUpForm = (props: SignUpFormProps) => {
                     size="sm"
                     className="w-full h-9 bg-primary text-on-primary hover:bg-primary-active font-bold rounded-xl shadow-xs text-xs mt-1"
                 >
-                    {isSubmitting ? 'Creating Account...' : 'Register Account'}
+                    {isSubmitting ? 'Creating account...' : 'Create Account'}
                 </Button>
             </Form>
         </div>

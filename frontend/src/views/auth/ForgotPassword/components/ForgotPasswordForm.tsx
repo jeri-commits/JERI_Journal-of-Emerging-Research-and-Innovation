@@ -2,7 +2,8 @@ import { useState } from 'react'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import { FormItem, Form } from '@/components/ui/Form'
-import { apiForgotPassword } from '@/services/AuthService'
+import classNames from '@/utils/classNames'
+import { requestPasswordReset } from '@/services/supabase/passwordReset'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -10,85 +11,79 @@ import type { ZodType } from 'zod'
 import type { CommonProps } from '@/@types/common'
 
 interface ForgotPasswordFormProps extends CommonProps {
-    emailSent: boolean
-    setEmailSent?: (compplete: boolean) => void
     setMessage?: (message: string) => void
+    onSent?: () => void
 }
 
-type ForgotPasswordFormSchema = {
-    email: string
-}
+type ForgotPasswordFormSchema = { email: string }
 
 const validationSchema: ZodType<ForgotPasswordFormSchema> = z.object({
-    email: z.string().email().min(5),
+    email: z
+        .string({ required_error: 'Please enter your email' })
+        .email({ message: 'Please enter a valid email address' }),
 })
 
 const ForgotPasswordForm = (props: ForgotPasswordFormProps) => {
-    const [isSubmitting, setSubmitting] = useState<boolean>(false)
-
-    const { className, setMessage, setEmailSent, emailSent, children } = props
+    const [isSubmitting, setSubmitting] = useState(false)
+    const { className, setMessage, onSent } = props
 
     const {
         handleSubmit,
         formState: { errors },
         control,
     } = useForm<ForgotPasswordFormSchema>({
+        defaultValues: { email: '' },
         resolver: zodResolver(validationSchema),
     })
 
-    const onForgotPassword = async (values: ForgotPasswordFormSchema) => {
-        const { email } = values
-
+    const onSubmit = async (values: ForgotPasswordFormSchema) => {
+        setSubmitting(true)
         try {
-            const resp = await apiForgotPassword<boolean>({ email })
-            if (resp) {
-                setSubmitting(false)
-                setEmailSent?.(true)
-            }
-        } catch (errors) {
-            setMessage?.(
-                typeof errors === 'string' ? errors : 'Some error occured!',
-            )
+            await requestPasswordReset(values.email)
+            onSent?.()
+        } catch (err) {
+            setMessage?.((err as Error).message || 'Something went wrong. Please try again.')
+        } finally {
             setSubmitting(false)
         }
-
-        setSubmitting(false)
     }
 
     return (
-        <div className={className}>
-            {!emailSent ? (
-                <Form onSubmit={handleSubmit(onForgotPassword)}>
-                    <FormItem
-                        label="Email"
-                        invalid={Boolean(errors.email)}
-                        errorMessage={errors.email?.message}
-                    >
-                        <Controller
-                            name="email"
-                            control={control}
-                            render={({ field }) => (
-                                <Input
-                                    type="email"
-                                    placeholder="Email"
-                                    autoComplete="off"
-                                    {...field}
-                                />
-                            )}
-                        />
-                    </FormItem>
-                    <Button
-                        block
-                        loading={isSubmitting}
-                        variant="solid"
-                        type="submit"
-                    >
-                        {isSubmitting ? 'Submiting...' : 'Submit'}
-                    </Button>
-                </Form>
-            ) : (
-                <>{children}</>
-            )}
+        <div className={classNames('w-full', className)}>
+            <Form onSubmit={handleSubmit(onSubmit)} className="space-y-2 w-full">
+                <FormItem
+                    label="Email Address"
+                    invalid={Boolean(errors.email)}
+                    errorMessage={errors.email?.message}
+                    className="mb-1.5"
+                >
+                    <Controller
+                        name="email"
+                        control={control}
+                        render={({ field }) => (
+                            <Input
+                                type="email"
+                                placeholder="Enter the email on your account"
+                                autoComplete="email"
+                                size="sm"
+                                className="h-9 text-xs"
+                                {...field}
+                            />
+                        )}
+                    />
+                </FormItem>
+
+                <Button
+                    loading={isSubmitting}
+                    disabled={isSubmitting}
+                    variant="default"
+                    type="submit"
+                    size="sm"
+                    className="w-full h-9 bg-primary text-on-primary hover:bg-primary-active font-bold rounded-xl shadow-xs text-xs mt-1"
+                >
+                    {isSubmitting ? 'Sending...' : 'Send Reset Link'}
+                </Button>
+            </Form>
         </div>
     )
 }

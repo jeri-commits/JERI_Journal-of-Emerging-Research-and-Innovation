@@ -22,17 +22,17 @@ export const SignUp: React.FC = () => {
 
     return (
         <div className="w-full min-h-screen bg-canvas text-ink flex flex-col justify-between p-2 md:p-4 font-sans relative overflow-hidden select-none">
-            
-            {/* 95% Embossed Background Watermark Logo (Aligned to Exact Form Center) */}
+
+            {/* 95% Embossed Background Watermark Logo */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -mt-2 md:-mt-4 z-0 pointer-events-none select-none opacity-60 flex items-center justify-center w-full">
-                <img 
-                    src="/img/logo/jeri-logo.png" 
-                    alt="JERI Background Watermark" 
+                <img
+                    src="/img/logo/jeri-logo.png"
+                    alt="JERI Background Watermark"
                     className="w-[85vw] max-w-[850px] h-auto object-contain drop-shadow-md"
                 />
             </div>
 
-            {/* Ambient Transparent Icons Spreading Across Layout (Max 6 Icons) */}
+            {/* Ambient Transparent Icons */}
             <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden min-h-full">
                 {authFloatingIcons.map((item, idx) => {
                     const IconComp = item.Icon
@@ -58,48 +58,43 @@ export const SignUp: React.FC = () => {
                 })}
             </div>
 
-            {/* Top Bar Header with Enlarged Top-Left Brand Logo */}
+            {/* Top Bar Header */}
             <div className="w-full max-w-6xl mx-auto flex items-center justify-between z-20 relative pt-2 px-2">
-                <img 
-                    src="/img/logo/jeri-logo.png" 
-                    alt="JERI Logo" 
+                <img
+                    src="/img/logo/jeri-logo.png"
+                    alt="JERI Logo"
                     className="h-14 md:h-16 w-auto max-w-[260px] md:max-w-[340px] object-contain cursor-pointer hover:opacity-90 transition-opacity drop-shadow-xs"
                     onClick={() => navigate('/')}
                 />
             </div>
 
-            {/* Main Single-View Auth Card (95% See-Through Form Glassmorphism) */}
+            {/* Main Auth Card */}
             <div className="w-full flex-1 flex flex-col items-center justify-center -mt-2 md:-mt-4 my-1 z-10 relative">
-                <div className="w-[410px] max-w-[95vw] shrink-0 bg-white/5 dark:bg-black/20 backdrop-blur-md border border-white/40 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] rounded-3xl p-4 md:p-5 space-y-2.5 relative mx-auto">
-                    
-                    {/* Card Title & Subtitle */}
+                <div className="w-[410px] max-w-[95vw] shrink-0 bg-white/80 dark:bg-gray-900/70 backdrop-blur-xl border border-white/60 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] rounded-3xl p-5 md:p-6 space-y-3.5 relative mx-auto">
+
                     <div className="text-center space-y-0.5">
-                        <h2 className="text-base font-extrabold text-ink tracking-tight">Create an Account</h2>
-                        <p className="text-[10px] text-body font-medium">Register to submit manuscripts and track review status</p>
+                        <h2 className="text-lg font-extrabold text-ink tracking-tight">Create Your Account</h2>
+                        <p className="text-xs text-body font-medium">Join JERI to submit and track your manuscripts</p>
                     </div>
 
-                    {/* Timeout Alert Message */}
                     {message && (
                         <Alert showIcon className="mb-1 text-xs py-1" type="danger">
                             <span className="break-all">{message}</span>
                         </Alert>
                     )}
 
-                    {/* Compact Register Form */}
                     <SignUpForm setMessage={setMessage} />
 
-                    {/* Inside-Card Footer Actions */}
-                    <div className="pt-2 border-t border-hairline/40 flex flex-col items-center gap-1.5 text-[11px] text-body">
+                    <div className="pt-2 border-t border-hairline/40 flex flex-col items-center gap-2 text-[11px] text-body">
                         <div>
                             <span>Already have an account? </span>
                             <Link to="/sign-in" className="font-bold text-primary hover:underline ml-0.5">
-                                Sign in
+                                Sign In
                             </Link>
                         </div>
 
-                        {/* Back to Home Link inside Card */}
-                        <Link 
-                            to="/" 
+                        <Link
+                            to="/"
                             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/30 dark:bg-gray-800/30 backdrop-blur-md text-ink hover:text-primary font-bold text-[11px] border border-hairline hover:border-primary/40 shadow-xs transition-all hover:scale-105"
                         >
                             <ArrowLeft className="h-3.5 w-3.5 text-primary" />
@@ -110,7 +105,6 @@ export const SignUp: React.FC = () => {
                 </div>
             </div>
 
-            {/* Bottom Footer Note */}
             <div className="text-center text-[10px] text-body font-medium z-10 relative pb-1">
                 © {new Date().getFullYear()} Journal of Emerging Research and Innovation (JERI). All rights reserved.
             </div>
