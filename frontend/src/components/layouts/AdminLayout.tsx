@@ -1,46 +1,47 @@
 import React, { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useAuth } from '@/auth'
 import LayoutBase from '@/components/template/LayoutBase'
 import { LAYOUT_COLLAPSIBLE_SIDE } from '@/constants/theme.constant'
-import { 
-    LayoutDashboard, 
-    FileCheck, 
-    Users, 
-    BookOpen, 
-    ShieldCheck, 
-    LogOut, 
-    Menu, 
+import {
+    LayoutDashboard,
+    FileCheck,
+    Users,
+    Mail,
+    UserCircle,
+    LogOut,
+    Menu,
     X,
-    ExternalLink,
     ChevronRight,
-    Sparkles
 } from 'lucide-react'
 import type { CommonProps } from '@/@types/common'
 
+const initials = (label: string) =>
+    label
+        .split(/[@\s]/)[0]
+        .slice(0, 2)
+        .toUpperCase()
+
 const AdminLayout: React.FC<CommonProps> = ({ children }) => {
-    const navigate = useNavigate()
     const location = useLocation()
     const { user, signOut } = useAuth()
     const [sidebarOpen, setSidebarOpen] = useState(true)
 
-    const adminName = user?.userName || 'Dr. Sarah Jenkins'
+    const displayName = user?.userName || user?.email || 'Admin'
 
     const navItems = [
         { label: 'Control Panel', path: '/admin', icon: LayoutDashboard },
-        { label: 'Editorial Triage', path: '/admin#triage', icon: FileCheck },
-        { label: 'Assign Reviewers', path: '/admin#reviewers', icon: Users },
-        { label: 'Issue Releases', path: '/admin#issues', icon: BookOpen },
+        { label: 'All Submissions', path: '/admin/submissions', icon: FileCheck },
+        { label: 'Users', path: '/admin/users', icon: Users },
+        { label: 'Email Log', path: '/admin/email-log', icon: Mail },
+        { label: 'My Profile', path: '/admin/profile', icon: UserCircle },
     ]
 
     const isNavActive = (path: string) => {
-        const currentFull = location.pathname + location.hash
-        if (path.includes('#')) {
-            return currentFull === path
-        }
-        return location.pathname === path && !location.hash
+        if (path === '/admin') return location.pathname === path
+        return location.pathname.startsWith(path)
     }
 
     return (
@@ -58,41 +59,33 @@ const AdminLayout: React.FC<CommonProps> = ({ children }) => {
                         {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                     </Button>
 
-                    <Link to="/admin" className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-purple-600 text-white rounded-md flex items-center justify-center font-bold text-base shadow-sm">
-                            J
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="font-semibold text-sm tracking-tight leading-none text-ink">JERI Admin</span>
-                            <span className="text-[10px] text-purple-600 font-medium tracking-wider uppercase">Editor Control Panel</span>
-                        </div>
+                    <Link to="/admin" className="flex items-center gap-2">
+                        <img src="/img/logo/jeri-logo.png" alt="JERI" className="h-8 w-auto object-contain" />
+                        <span className="font-semibold text-sm tracking-tight leading-none text-ink hidden sm:inline">JERI Admin</span>
                     </Link>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <Badge variant="purple" className="hidden sm:inline-flex gap-1 py-1 px-3">
-                        <ShieldCheck className="h-3.5 w-3.5" />
-                        <span>Admin Persona</span>
-                    </Badge>
+                    <div className="hidden sm:flex items-center gap-2.5">
+                        <Avatar className="h-8 w-8">
+                            <AvatarFallback className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
+                                {initials(displayName)}
+                            </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col leading-tight">
+                            <span className="text-xs font-semibold text-ink truncate max-w-[160px]">{displayName}</span>
+                            <span className="text-[11px] text-body truncate max-w-[160px]">{user?.email}</span>
+                        </div>
+                    </div>
 
-                    <Button 
-                        variant="outline" 
+                    <Button
+                        variant="ghost"
                         size="sm"
-                        onClick={() => navigate('/')} 
-                        className="hidden md:flex items-center gap-1 text-xs"
-                    >
-                        <span>Public Site</span>
-                        <ExternalLink className="h-3.5 w-3.5" />
-                    </Button>
-
-                    <Button 
-                        variant="ghost" 
-                        size="sm" 
                         onClick={signOut}
                         className="flex items-center gap-1.5 text-xs text-body hover:text-red-600"
                     >
                         <LogOut className="h-4 w-4" />
-                        <span className="hidden sm:inline">Sign Out</span>
+                        <span className="hidden sm:inline">Logout</span>
                     </Button>
                 </div>
             </header>
@@ -115,25 +108,6 @@ const AdminLayout: React.FC<CommonProps> = ({ children }) => {
                     } overflow-y-auto min-h-0`}
                 >
                     <div className={sidebarOpen ? "p-4 space-y-6" : "p-2 py-4 space-y-6"}>
-                        {/* Sidebar Header Badge */}
-                        {sidebarOpen ? (
-                            <div className="p-3 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800/50 space-y-1">
-                                <div className="text-xs font-semibold text-purple-900 dark:text-purple-300 flex items-center gap-1">
-                                    <Sparkles className="h-3.5 w-3.5" />
-                                    <span>Editorial Board</span>
-                                </div>
-                                <div className="text-xs text-purple-700 dark:text-purple-400 font-medium truncate">
-                                    {adminName}
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="flex justify-center" title={`Editorial Board: ${adminName}`}>
-                                <div className="w-9 h-9 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/50 text-purple-700 dark:text-purple-300 rounded-lg flex items-center justify-center font-bold text-xs">
-                                    <Sparkles className="h-4 w-4" />
-                                </div>
-                            </div>
-                        )}
-
                         {/* Sidebar Nav Items */}
                         <nav className="space-y-1.5">
                             {navItems.map((item) => {
@@ -167,24 +141,6 @@ const AdminLayout: React.FC<CommonProps> = ({ children }) => {
                                 )
                             })}
                         </nav>
-                    </div>
-
-                    {/* Sidebar Footer Link */}
-                    <div className={sidebarOpen ? "p-4 border-t border-hairline" : "p-2 py-3 border-t border-hairline flex justify-center"}>
-                        <Link 
-                            to="/" 
-                            title={!sidebarOpen ? "Back to Main Journal" : undefined}
-                            className="text-xs text-text-link hover:underline flex items-center justify-between gap-1"
-                        >
-                            {sidebarOpen ? (
-                                <>
-                                    <span>Back to Main Journal</span>
-                                    <ExternalLink className="h-3 w-3" />
-                                </>
-                            ) : (
-                                <ExternalLink className="h-4 w-4" />
-                            )}
-                        </Link>
                     </div>
                 </aside>
 
