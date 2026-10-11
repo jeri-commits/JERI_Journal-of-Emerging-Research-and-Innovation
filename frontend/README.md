@@ -1,31 +1,27 @@
-# Ecme - Lite
+# JERI frontend
 
-This is a lite version of Ecme - The Ultimate React, Vite & TypeScript Web Template
+The JERI website is a React 19 and TypeScript single-page app built with Vite. The application entry point is `src/main.tsx`; `src/App.tsx` installs the theme, router, authentication provider, layout, and route views.
 
-Full version: [demo](https://ecme-react.themenate.net/) | [download](https://themeforest.net/item/ecme-the-ultimate-react-tailwind-admin-template/54470284)
+## Commands
 
-## Prerequisites
+Run these commands from this directory:
 
-- node
-- npm
-- yarn (optional)
+```powershell
+npm install
+npm run dev
+npm run build
+npm run preview
+```
 
+The Vite development server listens on port 5173. Requests to `/api` are proxied to `http://localhost:3000`.
 
-## Installation and Run locally
+## Source map
 
-To get started follow this steps:
+- `src/views/` contains route-level pages, grouped into `public`, `auth`, `author`, and `admin` areas.
+- `src/components/route/` applies route and role checks; route definitions live in `src/configs/routes.config/`.
+- `src/components/layouts/` provides the public, authentication, author, and admin shells.
+- `src/components/ui/` contains reusable interface components; `src/components/shared/` contains app-level shared components.
+- `src/services/` contains API and authentication clients. `src/mock/` supplies the current mock authentication responses.
+- `src/configs/`, `src/constants/`, `src/store/`, `src/utils/`, and `src/locales/` hold app configuration, constants, state, helpers, and translations.
 
-- Install packages: `npm install`.
-- Start the project locally: `npm run dev` (running on port 5173).
-
-## Building Project
-
-To build the app for production run `npm run build`
-
-
-### Documentation
-[documentation](https://ecme-react.themenate.net/guide/documentation/introduction)
-
-### Get [full version](https://themeforest.net/item/ecme-the-ultimate-react-tailwind-admin-template/54470284) to unclock all components & features
-
-
+The backend is not implemented. Authentication is mocked when `enableMock` is true in `src/configs/app.config.ts`; author and admin dashboard records are sample data held in page state.
