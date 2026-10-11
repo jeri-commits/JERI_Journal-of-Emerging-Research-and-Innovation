@@ -1,25 +1,21 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/auth'
 import LayoutBase from '@/components/template/LayoutBase'
 import { LAYOUT_COLLAPSIBLE_SIDE } from '@/constants/theme.constant'
-import { 
-    ArrowRight, 
-    LogOut, 
-    LayoutDashboard, 
-    BookOpen, 
-    FileText, 
-    Atom, 
-    Sparkles, 
-    GraduationCap, 
-    Award, 
-    ScrollText, 
-    Microscope, 
-    Globe,
-    Bookmark
+import {
+    ArrowRight,
+    LogOut,
+    LayoutDashboard,
+    BookOpen,
+    Atom,
+    GraduationCap,
+    ScrollText,
+    Menu,
+    X,
 } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import type { CommonProps } from '@/@types/common'
 
 const PublicLayout: React.FC<CommonProps> = ({ children }) => {
@@ -27,6 +23,11 @@ const PublicLayout: React.FC<CommonProps> = ({ children }) => {
     const location = useLocation()
     const { authenticated, user, signOut } = useAuth()
     const userRole = user?.authority?.[0]
+    const [mobileNavOpen, setMobileNavOpen] = useState(false)
+
+    useEffect(() => {
+        setMobileNavOpen(false)
+    }, [location.pathname])
 
     const handleDashboardRedirect = () => {
         if (userRole === 'admin') {
@@ -61,22 +62,22 @@ const PublicLayout: React.FC<CommonProps> = ({ children }) => {
             {/* Non-Sticky Public Header */}
             <header className="w-full bg-canvas border-b border-hairline-strong">
                 {/* Row 1: Logo & Journal Title Banner on Clean White Background */}
-                <div className="bg-canvas border-b border-hairline py-5 md:py-6">
+                <div className="bg-canvas border-b border-hairline py-3.5 md:py-6">
                     <div className="container mx-auto px-4 md:px-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div className="flex items-center gap-6 text-left flex-1 min-w-0">
+                        <div className="flex items-center gap-3 md:gap-6 text-left flex-1 min-w-0">
                             <Link to="/" className="shrink-0 block">
-                                <img 
-                                    src="/img/logo/jeri-logo.png" 
-                                    alt="JERI Journal Logo" 
-                                    className="h-20 md:h-24 w-auto max-w-[260px] md:max-w-[300px] object-contain drop-shadow-sm transition-transform hover:scale-[1.02]" 
+                                <img
+                                    src="/img/logo/jeri-logo.png"
+                                    alt="JERI Journal Logo"
+                                    className="h-12 md:h-24 w-auto max-w-[140px] md:max-w-[300px] object-contain drop-shadow-sm transition-transform hover:scale-[1.02]"
                                 />
                             </Link>
-                            <div className="flex-1 min-w-0 space-y-1.5">
-                                <h1 className="font-extrabold text-2xl md:text-3xl lg:text-4xl text-ink tracking-tight leading-tight">
+                            <div className="flex-1 min-w-0 space-y-1">
+                                <h1 className="font-extrabold text-base sm:text-xl md:text-3xl lg:text-4xl text-ink tracking-tight leading-tight">
                                     Journal of Emerging Research and Innovation (JERI)
                                 </h1>
-                                <p className="text-sm md:text-base text-body font-medium">
-                                    Published By Sir Padampat Singhania University, Udaipur 
+                                <p className="text-[11px] sm:text-sm md:text-base text-body font-medium">
+                                    Published By Sir Padampat Singhania University, Udaipur
                                 </p>
                             </div>
                         </div>
@@ -88,7 +89,7 @@ const PublicLayout: React.FC<CommonProps> = ({ children }) => {
                     className="bg-primary text-on-primary py-2 md:py-2.5 shadow-md relative"
                 >
                     <div className="container mx-auto px-4 md:px-8 flex items-center justify-between gap-4 md:gap-6">
-                        <nav className="flex flex-wrap items-center gap-1 md:gap-2 text-sm md:text-base font-bold">
+                        <nav className="hidden lg:flex flex-nowrap items-center gap-1 xl:gap-2 text-sm font-bold">
                             {publicNavLinks.map((link) => {
                                 const isActive = location.pathname === link.path
                                 return (
@@ -117,31 +118,31 @@ const PublicLayout: React.FC<CommonProps> = ({ children }) => {
                             })}
                         </nav>
 
-                        <div className="flex items-center gap-3 shrink-0 py-1">
+                        <div className="hidden lg:flex items-center gap-3 shrink-0 py-1">
                             {authenticated ? (
                                 <div className="flex items-center gap-2">
-                                    <Button 
-                                        size="sm" 
-                                        onClick={handleDashboardRedirect} 
+                                    <Button
+                                        size="sm"
+                                        onClick={handleDashboardRedirect}
                                         className="bg-canvas text-primary hover:bg-gray-100 flex items-center gap-1.5 rounded-full px-4 text-xs font-bold shadow-xs transition-transform hover:scale-105 active:scale-95"
                                     >
                                         <LayoutDashboard className="h-3.5 w-3.5" />
                                         <span>{userRole === 'admin' ? 'Admin Dashboard' : 'Author Dashboard'}</span>
                                     </Button>
-                                    <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        onClick={signOut} 
-                                        title="Sign Out" 
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={signOut}
+                                        title="Sign Out"
                                         className="h-8 w-8 text-white hover:bg-white/20 transition-transform hover:scale-105 active:scale-95"
                                     >
                                         <LogOut className="h-3.5 w-3.5" />
                                     </Button>
                                 </div>
                             ) : (
-                                <Button 
+                                <Button
                                     size="sm"
-                                    onClick={() => navigate('/sign-in')} 
+                                    onClick={() => navigate('/sign-in')}
                                     className="bg-canvas text-primary hover:bg-gray-100 font-bold rounded-full px-6 flex items-center gap-1.5 text-xs shadow-sm whitespace-nowrap transition-transform hover:scale-105 active:scale-95"
                                 >
                                     <span>Login</span>
@@ -149,7 +150,80 @@ const PublicLayout: React.FC<CommonProps> = ({ children }) => {
                                 </Button>
                             )}
                         </div>
+
+                        {/* Mobile: hamburger toggle replaces the full nav row */}
+                        <button
+                            type="button"
+                            onClick={() => setMobileNavOpen((v) => !v)}
+                            aria-label={mobileNavOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                            aria-expanded={mobileNavOpen}
+                            className="lg:hidden ml-auto flex items-center justify-center h-9 w-9 rounded-full text-white hover:bg-white/15 transition-colors"
+                        >
+                            {mobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                        </button>
                     </div>
+
+                    {/* Mobile Nav Panel */}
+                    <AnimatePresence>
+                        {mobileNavOpen && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2, ease: 'easeOut' }}
+                                className="lg:hidden overflow-hidden border-t border-white/15"
+                            >
+                                <nav className="container mx-auto px-4 py-3 flex flex-col gap-1">
+                                    {publicNavLinks.map((link) => {
+                                        const isActive = location.pathname === link.path
+                                        return (
+                                            <Link
+                                                key={link.path}
+                                                to={link.path}
+                                                className={`px-3 py-2.5 rounded-lg text-sm font-bold transition-colors ${
+                                                    isActive ? 'bg-white/20 text-white' : 'text-white/85 hover:bg-white/10 hover:text-white'
+                                                }`}
+                                            >
+                                                {link.label}
+                                            </Link>
+                                        )
+                                    })}
+                                    <div className="pt-2 mt-2 border-t border-white/15">
+                                        {authenticated ? (
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    onClick={handleDashboardRedirect}
+                                                    className="flex-1 bg-canvas text-primary hover:bg-gray-100 flex items-center justify-center gap-1.5 rounded-full text-xs font-bold"
+                                                >
+                                                    <LayoutDashboard className="h-3.5 w-3.5" />
+                                                    <span>{userRole === 'admin' ? 'Admin Dashboard' : 'Author Dashboard'}</span>
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={signOut}
+                                                    aria-label="Sign Out"
+                                                    className="h-9 w-9 text-white hover:bg-white/20"
+                                                >
+                                                    <LogOut className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <Button
+                                                size="sm"
+                                                onClick={() => navigate('/sign-in')}
+                                                className="w-full bg-canvas text-primary hover:bg-gray-100 font-bold rounded-full flex items-center justify-center gap-1.5 text-xs"
+                                            >
+                                                <span>Login</span>
+                                                <ArrowRight className="h-3.5 w-3.5" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                </nav>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </header>
 
@@ -174,11 +248,8 @@ const PublicLayout: React.FC<CommonProps> = ({ children }) => {
                     />
                 </div>
 
-                {/* 2. Main View Content */}
-                <div className="relative z-10">{children}</div>
-
-                {/* 3. Ambient Floating Academic & Journal Icons Layer */}
-                <div className="absolute inset-0 pointer-events-none select-none z-20 overflow-hidden min-h-full">
+                {/* 2. Ambient Floating Academic & Journal Icons Layer (decorative -- stays behind real content) */}
+                <div className="absolute inset-0 pointer-events-none select-none z-[1] overflow-hidden min-h-full">
                     {bodyFloatingIcons.map((item, idx) => {
                         const IconComponent = item.Icon
                         return (
@@ -203,10 +274,13 @@ const PublicLayout: React.FC<CommonProps> = ({ children }) => {
                         )
                     })}
                 </div>
+
+                {/* 3. Main View Content -- always paints above the decorative layers */}
+                <div className="relative z-10">{children}</div>
             </main>
 
             {/* Public Layout Footer with Brand Blue (bg-primary) */}
-            <footer className="bg-primary text-on-primary border-t border-white/10 pt-12 pb-8 mt-auto relative z-10 shadow-lg">
+            <footer className="bg-primary text-on-primary border-t border-white/10 pt-12 pb-8 mt-auto shadow-lg">
                 <div className="container mx-auto px-4 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
                     {/* Column 1 (Leftmost): Enlarged Logo & Journal Title */}
                     <div className="space-y-3.5 sm:col-span-2 lg:col-span-1">
