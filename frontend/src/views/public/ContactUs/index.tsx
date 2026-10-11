@@ -3,20 +3,25 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { 
-    Mail, 
-    Globe, 
-    MapPin, 
-    Send, 
-    CheckCircle2, 
-    HelpCircle, 
-    Building2, 
+import { Alert } from '@/components/ui/Alert'
+import ScrollReveal from '@/components/shared/ScrollReveal'
+import { invokeFunction } from '@/services/supabase/functionsClient'
+import {
+    Mail,
+    Globe,
+    MapPin,
+    Send,
+    CheckCircle2,
+    Building2,
     Sparkles,
     MessageSquareText
 } from 'lucide-react'
 
 const ContactUs: React.FC = () => {
     const [submitted, setSubmitted] = useState(false)
+    const [submitting, setSubmitting] = useState(false)
+    const [error, setError] = useState('')
+    const [sentToEmail, setSentToEmail] = useState('')
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
@@ -24,30 +29,31 @@ const ContactUs: React.FC = () => {
         message: ''
     })
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (formData.fullName && formData.email && formData.message) {
+        if (submitting) return
+        if (!formData.fullName || !formData.email || !formData.message) return
+
+        setSubmitting(true)
+        setError('')
+        try {
+            await invokeFunction('send-contact-message', formData)
+            setSentToEmail(formData.email)
             setSubmitted(true)
-            setTimeout(() => {
-                setSubmitted(false)
-                setFormData({ fullName: '', email: '', subject: '', message: '' })
-            }, 4000)
+            setFormData({ fullName: '', email: '', subject: '', message: '' })
+        } catch (err) {
+            setError((err as Error).message || 'Could not send your message. Please try again.')
+        } finally {
+            setSubmitting(false)
         }
     }
-
-    const supportTopics = [
-        'Manuscript Submission',
-        'Peer Review Process',
-        'Publication Policies',
-        'Editorial Guidelines',
-        'Technical Issues',
-    ]
 
     return (
         <div className="bg-canvas text-ink flex flex-col font-sans">
             <main className="max-w-6xl mx-auto px-6 py-12 md:py-16 space-y-12 w-full">
                 
                 {/* Header Banner */}
+                <ScrollReveal>
                 <div className="space-y-4 text-center">
                     <Badge variant="outline" className="gap-2 py-1 px-4 text-primary border-primary/20 bg-primary/5">
                         <MessageSquareText className="h-3.5 w-3.5" />
@@ -60,11 +66,13 @@ const ContactUs: React.FC = () => {
                         Have questions regarding manuscript submission, peer review, publication policies, or the editorial process? The Journal of Emerging Research and Innovation (JERI) Editorial Office is here to assist you. For all journal-related inquiries, please contact us using the details below.
                     </p>
                 </div>
+                </ScrollReveal>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    
+
                     {/* Left Column: Official Contact Details & Support Scope (5 cols) */}
-                    <div className="lg:col-span-5 space-y-6">
+                    <ScrollReveal className="lg:col-span-5">
+                    <div className="space-y-6">
                         
                         {/* Official Publisher & Address Card */}
                         <Card className="p-6 space-y-4 border border-hairline bg-surface-card shadow-xs">
@@ -126,9 +134,11 @@ const ContactUs: React.FC = () => {
 
                         </div>
                     </div>
+                    </ScrollReveal>
 
                     {/* Right Column: Contact Form UI Component (7 cols) */}
-                    <div className="lg:col-span-7">
+                    <ScrollReveal className="lg:col-span-7" delay={0.1}>
+                    <div>
                         <Card className="p-6 md:p-8 space-y-6 border-2 border-primary/20 bg-surface-card shadow-md rounded-3xl">
                             <div className="space-y-1.5 border-b border-hairline pb-4">
                                 <div className="flex items-center justify-between">
@@ -147,11 +157,24 @@ const ContactUs: React.FC = () => {
                                     <CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto" />
                                     <h4 className="text-lg font-bold text-ink">Message Sent Successfully!</h4>
                                     <p className="text-xs text-body max-w-md mx-auto font-medium">
-                                        Thank you for contacting JERI Editorial Office. We have received your inquiry and will get back to you shortly at <span className="font-bold text-ink">{formData.email}</span>.
+                                        Thank you for contacting JERI Editorial Office. We have received your inquiry and will get back to you shortly at <span className="font-bold text-ink">{sentToEmail}</span>.
                                     </p>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setSubmitted(false)}
+                                        className="mt-2"
+                                    >
+                                        Send another message
+                                    </Button>
                                 </div>
                             ) : (
                                 <form onSubmit={handleSubmit} className="space-y-4">
+                                    {error && (
+                                        <Alert showIcon type="danger" className="text-xs">
+                                            {error}
+                                        </Alert>
+                                    )}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-bold text-ink">Full Name <span className="text-red-500">*</span></label>
@@ -199,17 +222,19 @@ const ContactUs: React.FC = () => {
                                         />
                                     </div>
 
-                                    <Button 
-                                        type="submit" 
+                                    <Button
+                                        type="submit"
+                                        disabled={submitting}
                                         className="w-full bg-primary text-on-primary hover:bg-primary-active font-bold h-11 rounded-xl shadow-xs flex items-center justify-center gap-2 text-xs"
                                     >
-                                        <span>Send Message</span>
+                                        <span>{submitting ? 'Sending…' : 'Send Message'}</span>
                                         <Send className="h-4 w-4" />
                                     </Button>
                                 </form>
                             )}
                         </Card>
                     </div>
+                    </ScrollReveal>
 
                 </div>
 

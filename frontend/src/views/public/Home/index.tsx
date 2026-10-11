@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import ScrollReveal from '@/components/shared/ScrollReveal'
+import ParallaxLayer from '@/components/shared/ParallaxLayer'
 import { 
     Target, 
     Compass, 
@@ -114,18 +116,19 @@ const Home: React.FC = () => {
             <main className="max-w-5xl mx-auto px-6 py-12 md:py-16 space-y-16">
                 
                 {/* Hero Title Section */}
-                <div className="bg-gradient-to-br from-[#0d74ce]/[0.08] via-canvas to-canvas border border-[#0d74ce]/15 p-8 md:p-12 rounded-3xl text-center space-y-5 shadow-xs">
-                    <Badge variant="outline" className="gap-2 py-1 px-4 bg-white/90 dark:bg-gray-900/90 text-primary border-primary/20">
+                <div className="relative bg-gradient-to-br from-[#0d74ce]/[0.08] via-canvas to-canvas border border-[#0d74ce]/15 p-8 md:p-12 rounded-3xl text-center space-y-5 shadow-xs overflow-hidden">
+                    <ParallaxLayer className="absolute inset-0 pointer-events-none" range={30}>
+                        <div className="absolute -top-10 -right-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
+                        <div className="absolute -bottom-16 -left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+                    </ParallaxLayer>
+                    <Badge variant="outline" className="relative gap-2 py-1 px-4 bg-white/90 dark:bg-gray-900/90 text-primary border-primary/20">
                         <Sparkles className="h-3.5 w-3.5" />
                         <span>Peer-Reviewed Open Access Scientific Journal</span>
                     </Badge>
-                    <h1 className="text-display-lg md:text-display-xl text-ink font-extrabold tracking-tight">
-                        Journal of Emerging Research and Innovation (JERI)
+                    <h1 className="text-display-lg md:text-display-xl text-ink font-extrabold tracking-tight max-w-3xl mx-auto">
+                        Where emerging research finds a credible, open audience
                     </h1>
-                    <p className="text-base md:text-lg text-primary font-bold tracking-wide">
-                        Published By Sir Padampat Singhania University, Udaipur
-                    </p>
-                    <p className="text-body-md text-body max-w-3xl mx-auto pt-2">
+                    <p className="text-body-md text-body max-w-2xl mx-auto pt-2">
                         JERI is a peer-reviewed open access scientific journal committed to publishing groundbreaking interdisciplinary research across engineering, emerging technologies, science, management, and humanities.
                     </p>
 
@@ -154,20 +157,23 @@ const Home: React.FC = () => {
                     {keyHighlights.map((item, idx) => {
                         const IconComp = item.icon
                         return (
-                            <Card key={idx} className="p-6 space-y-3 border border-hairline bg-surface-card hover:shadow-md transition-shadow">
-                                <div className="p-3 bg-primary/10 rounded-xl text-primary w-fit">
-                                    <IconComp className="h-6 w-6" />
-                                </div>
-                                <h3 className="text-title-md text-ink font-semibold">{item.title}</h3>
-                                <p className="text-body-sm text-body leading-relaxed">
-                                    {item.desc}
-                                </p>
-                            </Card>
+                            <ScrollReveal key={idx} delay={idx * 0.08}>
+                                <Card className="p-6 space-y-3 border border-hairline bg-surface-card hover:shadow-md transition-shadow h-full">
+                                    <div className="p-3 bg-primary/10 rounded-xl text-primary w-fit">
+                                        <IconComp className="h-6 w-6" />
+                                    </div>
+                                    <h3 className="text-title-md text-ink font-semibold">{item.title}</h3>
+                                    <p className="text-body-sm text-body leading-relaxed">
+                                        {item.desc}
+                                    </p>
+                                </Card>
+                            </ScrollReveal>
                         )
                     })}
                 </section>
 
                 {/* About the Journal Detailed Overview */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -185,13 +191,12 @@ const Home: React.FC = () => {
                         <p>
                             The journal welcomes contributions from students, researchers, academicians, and professionals working in emerging fields of science, engineering, technology, management, and social sciences. JERI is committed to maintaining high standards of academic integrity through a rigorous double-blind peer-review process, ensuring that published work is original, relevant, and impactful.
                         </p>
-                        <p className="font-medium text-ink">
-                            Our mission is to provide a credible and accessible platform where new and innovative ideas can be shared with the global research community, fostering collaboration and driving progress in emerging areas of research.
-                        </p>
                     </div>
                 </section>
+                </ScrollReveal>
 
                 {/* Aim, Vision & Mission Cards */}
+                <ScrollReveal>
                 <section className="space-y-8">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -277,6 +282,7 @@ const Home: React.FC = () => {
                         </div>
                     </Card>
                 </section>
+                </ScrollReveal>
 
                 {/* Scope Grid Section */}
                 <section className="space-y-6">
@@ -298,23 +304,26 @@ const Home: React.FC = () => {
                         {scopeDomains.map((domain, idx) => {
                             const IconComp = domain.icon
                             return (
-                                <Card key={idx} className="p-5 space-y-3 border border-hairline bg-surface-card hover:border-primary/40 hover:shadow-sm transition-all group">
-                                    <div className="p-2.5 bg-primary/10 rounded-xl text-primary w-fit group-hover:scale-105 transition-transform">
-                                        <IconComp className="h-5 w-5" />
-                                    </div>
-                                    <h4 className="text-sm font-bold text-ink group-hover:text-primary transition-colors">
-                                        {domain.title}
-                                    </h4>
-                                    <p className="text-xs text-body leading-relaxed">
-                                        {domain.desc}
-                                    </p>
-                                </Card>
+                                <ScrollReveal key={idx} delay={(idx % 4) * 0.06}>
+                                    <Card className="p-5 space-y-3 border border-hairline bg-surface-card hover:border-primary/40 hover:shadow-sm transition-all group h-full">
+                                        <div className="p-2.5 bg-primary/10 rounded-xl text-primary w-fit group-hover:scale-105 transition-transform">
+                                            <IconComp className="h-5 w-5" />
+                                        </div>
+                                        <h4 className="text-sm font-bold text-ink group-hover:text-primary transition-colors">
+                                            {domain.title}
+                                        </h4>
+                                        <p className="text-xs text-body leading-relaxed">
+                                            {domain.desc}
+                                        </p>
+                                    </Card>
+                                </ScrollReveal>
                             )
                         })}
                     </div>
                 </section>
 
                 {/* Journal History & Timeline Section */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -357,8 +366,10 @@ const Home: React.FC = () => {
                         </div>
                     </Card>
                 </section>
+                </ScrollReveal>
 
                 {/* Call to Action Banner */}
+                <ScrollReveal>
                 <div className="bg-primary text-on-primary p-8 md:p-12 rounded-3xl text-center space-y-6 shadow-lg relative overflow-hidden">
                     <div className="max-w-2xl mx-auto space-y-3 relative z-10">
                         <h3 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
@@ -388,6 +399,7 @@ const Home: React.FC = () => {
                         </Button>
                     </div>
                 </div>
+                </ScrollReveal>
 
             </main>
         </div>

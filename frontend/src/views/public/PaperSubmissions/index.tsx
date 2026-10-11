@@ -2,20 +2,19 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import ScrollReveal from '@/components/shared/ScrollReveal'
 import { 
-    Lock, 
-    LogIn, 
-    UserPlus, 
-    CheckCircle2, 
+    Lock,
+    LogIn,
+    CheckCircle2,
     FileText, 
     UploadCloud, 
     Clock, 
     Download, 
     MessageSquare, 
     FileCheck, 
-    Sparkles, 
+    Sparkles,
     ShieldAlert,
-    LayoutDashboard
 } from 'lucide-react'
 
 const PaperSubmissions: React.FC = () => {
@@ -31,19 +30,12 @@ const PaperSubmissions: React.FC = () => {
         { label: 'Communicate with Editorial Office', icon: MessageSquare },
     ]
 
-    const afterLoginFeatures = [
-        'New Submission',
-        'My Manuscripts',
-        'Revision Requests',
-        'Accepted Papers',
-        'Profile Settings',
-    ]
-
     return (
         <div className="bg-canvas text-ink flex flex-col font-sans relative overflow-hidden">
             <main className="max-w-4xl mx-auto px-4 py-4 md:py-6 space-y-4 w-full relative z-10">
                 
                 {/* Compact Header Title */}
+                <ScrollReveal>
                 <div className="space-y-1.5 text-center">
                     <Badge variant="outline" className="gap-1.5 py-0.5 px-3 text-primary border-primary/20 bg-primary/5 text-[11px]">
                         <Sparkles className="h-3 w-3" />
@@ -53,8 +45,10 @@ const PaperSubmissions: React.FC = () => {
                         Submit Your Manuscript
                     </h1>
                 </div>
+                </ScrollReveal>
 
                 {/* Single Frame Submission Container */}
+                <ScrollReveal delay={0.08}>
                 <div className="relative rounded-2xl overflow-hidden p-0.5">
                     
                     {/* Blurred Background Layer (Submission Guidelines) */}
@@ -68,7 +62,7 @@ const PaperSubmissions: React.FC = () => {
                             <ul className="space-y-1 pl-4 list-disc">
                                 <li>Be original and unpublished.</li>
                                 <li>Not be under consideration for publication elsewhere.</li>
-                                <li>Follow the journal's submission and ethical guidelines.</li>
+                                <li>Follow the journal&apos;s submission and ethical guidelines.</li>
                                 <li>Include complete and accurate author information.</li>
                                 <li>Clearly state the contribution and significance of the research.</li>
                                 <li>Meet the required formatting and manuscript preparation guidelines.</li>
@@ -117,40 +111,19 @@ const PaperSubmissions: React.FC = () => {
 
                         {/* Action Buttons */}
                         <div className="flex items-center justify-center gap-3 pt-1">
-                            <Button 
-                                size="sm" 
+                            <Button
+                                size="sm"
                                 onClick={() => navigate('/sign-in')}
                                 className="bg-primary text-on-primary hover:bg-primary-active font-bold px-7 rounded-full shadow-xs flex items-center gap-1.5 text-xs"
                             >
                                 <LogIn className="h-3.5 w-3.5" />
-                                <span>Login</span>
+                                <span>Sign In / Register</span>
                             </Button>
-                            <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => navigate('/sign-up')}
-                                className="border-primary/30 text-primary font-bold px-7 rounded-full hover:bg-primary/10 text-xs"
-                            >
-                                <UserPlus className="h-3.5 w-3.5" />
-                                <span>Create an Account</span>
-                            </Button>
-                        </div>
-
-                        {/* Integrated Author Dashboard Features Bar */}
-                        <div className="pt-2 border-t border-hairline flex flex-wrap items-center justify-center gap-2 text-[11px]">
-                            <span className="font-bold text-body flex items-center gap-1">
-                                <LayoutDashboard className="h-3.5 w-3.5 text-primary" />
-                                <span>Author Dashboard Access:</span>
-                            </span>
-                            {afterLoginFeatures.map((feat, idx) => (
-                                <span key={idx} className="px-2 py-0.5 bg-surface-strong rounded-md font-semibold text-ink text-[10px]">
-                                    {feat}
-                                </span>
-                            ))}
                         </div>
 
                     </div>
                 </div>
+                </ScrollReveal>
 
             </main>
         </div>

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import ScrollReveal from '@/components/shared/ScrollReveal'
 import { 
     ShieldCheck, 
     FileText, 
@@ -157,6 +158,7 @@ JERI reserves the right to investigate suspected ethical violations and take app
             <main className="max-w-5xl mx-auto px-6 py-12 md:py-16 space-y-12 w-full">
                 
                 {/* Header Banner */}
+                <ScrollReveal>
                 <div className="space-y-4 text-center">
                     <Badge variant="outline" className="gap-2 py-1 px-4 text-primary border-primary/20 bg-primary/5">
                         <ShieldCheck className="h-3.5 w-3.5" />
@@ -172,45 +174,35 @@ JERI reserves the right to investigate suspected ethical violations and take app
                         The Journal of Emerging Research and Innovation (JERI) is committed to maintaining the highest standards of publication ethics, academic integrity, transparency, and responsible scholarly communication.
                     </p>
                 </div>
-
-                {/* Free APC Banner Notice */}
-                <div className="p-6 bg-surface-card border-2 border-primary/30 rounded-3xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-                    <div className="space-y-1">
-                        <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-bold text-xs">
-                            100% Free Open Access • Zero APC
-                        </Badge>
-                        <h3 className="text-base font-bold text-ink">Zero Article Processing Charges</h3>
-                        <p className="text-xs text-body font-medium">
-                            JERI does not charge authors any APC, submission fees, or publication fees. Editorial decisions are based solely on academic quality, originality, and methodological rigor.
-                        </p>
-                    </div>
-                    <Sparkles className="h-10 w-10 text-primary shrink-0 opacity-80" />
-                </div>
+                </ScrollReveal>
 
                 {/* 20 Ethics Sections Grid */}
                 <div className="space-y-6">
-                    {ethicsSections.map((sec) => {
+                    {ethicsSections.map((sec, idx) => {
                         const IconComp = sec.icon
                         return (
-                            <Card key={sec.number} className="p-6 md:p-8 space-y-4 border border-hairline bg-surface-card hover:border-primary/40 transition-all shadow-xs">
-                                <div className="flex items-center gap-3 border-b border-hairline pb-3">
-                                    <span className="w-8 h-8 rounded-xl bg-primary/10 text-primary font-extrabold text-xs flex items-center justify-center shrink-0">
-                                        {sec.number}
-                                    </span>
-                                    <h2 className="text-lg md:text-xl font-extrabold text-ink tracking-tight flex items-center gap-2">
-                                        <IconComp className="h-5 w-5 text-primary shrink-0" />
-                                        <span>{sec.title}</span>
-                                    </h2>
-                                </div>
-                                <div className="text-body-sm text-body leading-relaxed whitespace-pre-line font-medium">
-                                    {sec.content}
-                                </div>
-                            </Card>
+                            <ScrollReveal key={sec.number} delay={(idx % 4) * 0.05}>
+                                <Card className="p-6 md:p-8 space-y-4 border border-hairline bg-surface-card hover:border-primary/40 transition-all shadow-xs">
+                                    <div className="flex items-center gap-3 border-b border-hairline pb-3">
+                                        <span className="w-8 h-8 rounded-xl bg-primary/10 text-primary font-extrabold text-xs flex items-center justify-center shrink-0">
+                                            {sec.number}
+                                        </span>
+                                        <h2 className="text-lg md:text-xl font-extrabold text-ink tracking-tight flex items-center gap-2">
+                                            <IconComp className="h-5 w-5 text-primary shrink-0" />
+                                            <span>{sec.title}</span>
+                                        </h2>
+                                    </div>
+                                    <div className="text-body-sm text-body leading-relaxed whitespace-pre-line font-medium">
+                                        {sec.content}
+                                    </div>
+                                </Card>
+                            </ScrollReveal>
                         )
                     })}
                 </div>
 
                 {/* Section 20 Core Values Ending Banner */}
+                <ScrollReveal>
                 <Card className="p-8 md:p-10 border-2 border-primary/30 bg-gradient-to-br from-primary/5 via-surface-card to-surface-card text-center space-y-6 shadow-md rounded-3xl">
                     <div className="flex justify-center">
                         <div className="p-4 bg-primary/10 rounded-2xl text-primary">
@@ -226,11 +218,8 @@ JERI reserves the right to investigate suspected ethical violations and take app
                             Originality • Integrity • Transparency • Accountability • Fairness • Confidentiality • Academic Excellence
                         </p>
                     </div>
-
-                    <p className="text-xs md:text-sm text-body leading-relaxed max-w-2xl mx-auto font-medium">
-                        JERI remains steadfastly committed to upholding these core publication ethics principles and actively investigating any suspected violations to protect the integrity of the scholarly record.
-                    </p>
                 </Card>
+                </ScrollReveal>
 
             </main>
         </div>

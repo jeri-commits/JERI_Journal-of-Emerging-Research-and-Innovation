@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import ScrollReveal from '@/components/shared/ScrollReveal'
 import { 
     FileText, 
     ShieldAlert, 
@@ -22,9 +23,7 @@ import {
     Sparkles,
     DollarSign,
     BookOpen,
-    HelpCircle,
     UserCheck,
-    Clock,
     Award
 } from 'lucide-react'
 
@@ -116,6 +115,7 @@ const AuthorsGuide: React.FC = () => {
                 </div>
 
                 {/* Journal Introduction Section */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -141,8 +141,10 @@ const AuthorsGuide: React.FC = () => {
                         </p>
                     </div>
                 </section>
+                </ScrollReveal>
 
                 {/* Article Processing Charges (APC) Zero Fee Highlight */}
+                <ScrollReveal>
                 <section className="bg-emerald-500/10 border border-emerald-500/30 p-6 md:p-8 rounded-3xl space-y-3">
                     <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400">
                         <DollarSign className="h-7 w-7 shrink-0" />
@@ -157,8 +159,10 @@ const AuthorsGuide: React.FC = () => {
                         All accepted research is published open-access with full global availability under Creative Commons licensing.
                     </p>
                 </section>
+                </ScrollReveal>
 
                 {/* Plagiarism Policy Warning */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-red-500/10 rounded-lg text-red-500">
@@ -185,8 +189,10 @@ const AuthorsGuide: React.FC = () => {
                         </div>
                     </Card>
                 </section>
+                </ScrollReveal>
 
                 {/* Types of Papers Accepted */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -218,8 +224,10 @@ const AuthorsGuide: React.FC = () => {
                         The submitted work should demonstrate academic relevance, originality, methodological soundness, and meaningful contribution to the selected field.
                     </p>
                 </section>
+                </ScrollReveal>
 
                 {/* Areas of Interest (Scope) */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -246,8 +254,10 @@ const AuthorsGuide: React.FC = () => {
                         JERI also encourages interdisciplinary research addressing real-world problems through innovative scientific and technological approaches.
                     </p>
                 </section>
+                </ScrollReveal>
 
                 {/* Online Submission Requirements */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -276,7 +286,7 @@ const AuthorsGuide: React.FC = () => {
                                 </li>
                                 <li className="flex items-center gap-2.5 p-3 bg-surface-strong/60 rounded-xl border border-hairline">
                                     <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                                    <span>Follow the journal's submission and ethical guidelines.</span>
+                                    <span>Follow the journal&apos;s submission and ethical guidelines.</span>
                                 </li>
                                 <li className="flex items-center gap-2.5 p-3 bg-surface-strong/60 rounded-xl border border-hairline">
                                     <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
@@ -305,8 +315,10 @@ const AuthorsGuide: React.FC = () => {
                         </div>
                     </Card>
                 </section>
+                </ScrollReveal>
 
                 {/* Initial Submission & Author Rules */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -349,8 +361,10 @@ const AuthorsGuide: React.FC = () => {
                         </div>
                     </Card>
                 </section>
+                </ScrollReveal>
 
                 {/* Accepted Version Preparation */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -373,8 +387,10 @@ const AuthorsGuide: React.FC = () => {
                         </p>
                     </Card>
                 </section>
+                </ScrollReveal>
 
                 {/* Final Formatting Guidelines Table */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -411,8 +427,10 @@ const AuthorsGuide: React.FC = () => {
                         Authors should ensure that tables, figures, equations, references, and other manuscript elements are clearly presented and appropriately numbered.
                     </p>
                 </section>
+                </ScrollReveal>
 
                 {/* JERI Manuscript Templates Downloads */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -437,12 +455,15 @@ const AuthorsGuide: React.FC = () => {
                                     Official Microsoft Word template (.docx) with formatted styles, headers, and reference styles.
                                 </p>
                             </div>
-                            <Button 
-                                variant="outline" 
+                            <Button
+                                asChild
+                                variant="outline"
                                 className="w-full flex items-center justify-center gap-2 border-primary/30 text-primary font-bold hover:bg-primary hover:text-white transition-colors"
                             >
-                                <Download className="h-4 w-4" />
-                                <span>Download Word Template</span>
+                                <a href="mailto:editor@jeri-journal.org?subject=Request%20for%20JERI%20Word%20Template">
+                                    <Mail className="h-4 w-4" />
+                                    <span>Request Word Template</span>
+                                </a>
                             </Button>
                         </Card>
 
@@ -456,18 +477,23 @@ const AuthorsGuide: React.FC = () => {
                                     Sample PDF layout specification detailing column dimensions, margins, and typography.
                                 </p>
                             </div>
-                            <Button 
-                                variant="outline" 
+                            <Button
+                                asChild
+                                variant="outline"
                                 className="w-full flex items-center justify-center gap-2 border-primary/30 text-primary font-bold hover:bg-primary hover:text-white transition-colors"
                             >
-                                <Download className="h-4 w-4" />
-                                <span>Download PDF Specification</span>
+                                <a href="mailto:editor@jeri-journal.org?subject=Request%20for%20JERI%20PDF%20Specification">
+                                    <Mail className="h-4 w-4" />
+                                    <span>Request PDF Specification</span>
+                                </a>
                             </Button>
                         </Card>
                     </div>
                 </section>
+                </ScrollReveal>
 
                 {/* Peer Review Process */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -487,8 +513,10 @@ const AuthorsGuide: React.FC = () => {
                         ))}
                     </div>
                 </section>
+                </ScrollReveal>
 
                 {/* Copyright and Licensing */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -504,15 +532,19 @@ const AuthorsGuide: React.FC = () => {
                             All articles published in JERI are licensed under Creative Commons Attribution 4.0 International (CC-BY 4.0). Authors retain copyright to their work while granting JERI a license to publish and distribute the article globally.
                         </p>
                         <div className="pt-2">
-                            <Button variant="outline" className="flex items-center gap-2 border-primary/30 text-primary font-bold">
-                                <Download className="h-4 w-4" />
-                                <span>Download JERI Copyright Form</span>
+                            <Button asChild variant="outline" className="flex items-center gap-2 border-primary/30 text-primary font-bold">
+                                <a href="mailto:editor@jeri-journal.org?subject=Request%20for%20JERI%20Copyright%20Form">
+                                    <Mail className="h-4 w-4" />
+                                    <span>Request Copyright Form</span>
+                                </a>
                             </Button>
                         </div>
                     </Card>
                 </section>
+                </ScrollReveal>
 
                 {/* Manuscript Withdrawal Policy */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -544,8 +576,10 @@ const AuthorsGuide: React.FC = () => {
                         </Card>
                     </div>
                 </section>
+                </ScrollReveal>
 
                 {/* Quality & Ethics, Author Responsibilities, Disclaimer */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 border-b border-hairline pb-4">
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -577,8 +611,10 @@ const AuthorsGuide: React.FC = () => {
                         </Card>
                     </div>
                 </section>
+                </ScrollReveal>
 
                 {/* Contact the Editorial Office */}
+                <ScrollReveal>
                 <section className="bg-primary text-on-primary p-8 md:p-12 rounded-3xl space-y-6 shadow-lg">
                     <div className="space-y-2">
                         <Badge variant="outline" className="bg-white/10 text-white border-white/20">
@@ -622,6 +658,7 @@ const AuthorsGuide: React.FC = () => {
                         For queries regarding manuscript submission, peer review, publication, editorial policies, or technical issues, authors may contact the JERI Editorial Office.
                     </p>
                 </section>
+                </ScrollReveal>
 
             </main>
         </div>

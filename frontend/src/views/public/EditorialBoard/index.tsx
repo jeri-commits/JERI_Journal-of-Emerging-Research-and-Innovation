@@ -1,7 +1,8 @@
 import React from 'react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Award, BookOpen, Crown, Building2, UserCheck, ShieldCheck } from 'lucide-react'
+import ScrollReveal from '@/components/shared/ScrollReveal'
+import { Award, Crown, Building2, UserCheck, ShieldCheck } from 'lucide-react'
 
 const EditorialBoard: React.FC = () => {
     // 1. Leadership
@@ -106,6 +107,7 @@ const EditorialBoard: React.FC = () => {
                 </div>
 
                 {/* Section 1: Executive Leadership (Editor-in-Chief & Associate Editor-in-Chief) */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-2.5 border-b border-hairline pb-3">
                         <Crown className="h-5 w-5 text-primary" />
@@ -153,8 +155,10 @@ const EditorialBoard: React.FC = () => {
                         ))}
                     </div>
                 </section>
+                </ScrollReveal>
 
                 {/* Section 2: Advisory Editors */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center gap-2.5 border-b border-hairline pb-3">
                         <Award className="h-5 w-5 text-primary" />
@@ -179,8 +183,10 @@ const EditorialBoard: React.FC = () => {
                         ))}
                     </div>
                 </section>
+                </ScrollReveal>
 
                 {/* Section 3: Editorial Board Members (37 Members Grid) */}
+                <ScrollReveal>
                 <section className="space-y-6">
                     <div className="flex items-center justify-between border-b border-hairline pb-3">
                         <div className="flex items-center gap-2.5">
@@ -213,6 +219,7 @@ const EditorialBoard: React.FC = () => {
                         ))}
                     </div>
                 </section>
+                </ScrollReveal>
 
             </main>
         </div>
