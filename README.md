@@ -1,159 +1,223 @@
 <div align="center">
 
-# JERI
-### Journal of Emerging Research and Innovation
+<img src="frontend/public/img/logo/jeri-logo.png" alt="JERI Logo" width="180" style="margin-bottom: 12px;" />
 
-**A peer-reviewed, open-access academic journal platform** — built end-to-end with a public
-reading experience, an author submission portal, and an editorial admin console, running on a
-real Supabase backend with Cloudflare R2 storage and transactional email.
+# Journal of Emerging Research and Innovation (JERI)
+### 🏛️ Sir Padampat Singhania University (SPSU), Udaipur
 
-[**Live Site → jeri-spsu.co.in**](https://jeri-spsu.co.in)
+**A production-grade, peer-reviewed, open-access academic publishing platform.**  
+Engineered end-to-end with an open public journal portal, an authenticated author submission console, and an editorial management workspace powered by Supabase, Cloudflare R2, and Deno Edge Functions.
 
-[![Live](https://img.shields.io/badge/live-jeri--spsu.co.in-0d74ce?style=for-the-badge)](https://jeri-spsu.co.in)
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20Edge%20Functions-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
-[![Tailwind](https://img.shields.io/badge/Tailwind-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+<br />
+
+[![Live Platform](https://img.shields.io/badge/Live%20Platform-jeri--spsu.co.in-0d74ce?style=for-the-badge&logo=googlechrome&logoColor=white)](https://jeri-spsu.co.in)
+[![React](https://img.shields.io/badge/React-19.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
+[![Supabase](https://img.shields.io/badge/Supabase-Database%20%26%20Edge%20Functions-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
+[![Cloudflare R2](https://img.shields.io/badge/Cloudflare_R2-Object_Storage-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://www.cloudflare.com/developer-platform/r2/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4.0-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 
 </div>
 
 ---
 
-## What this is
+## 🌟 Executive Overview
 
-JERI is a multidisciplinary, open-access scientific journal published by **Sir Padampat
-Singhania University**, Udaipur. This repository is the full platform behind it: the public
-marketing/archive site readers see, the portal authors use to submit and track manuscripts, and
-the console the editorial team uses to run double-blind peer review from first submission
-through to publication.
+**JERI (Journal of Emerging Research and Innovation)** is a multidisciplinary, peer-reviewed scientific journal dedicated to publishing cutting-edge advancements across Engineering, Artificial Intelligence, Science, and Technology. 
 
-It isn't a demo with mock data — every workflow here (submission intake, reviewer rounds,
-revisions, final camera-ready upload, publication) runs against a live Postgres database, real
-file storage, and real outbound email.
+This repository contains the complete codebase powering the journal's official operations:
+- 🌐 **Public Open-Access Archive**: Browsable issue archives, volume explorer, paper abstracts, editorial guidelines, and contact channels.
+- ✍️ **Author Workspace**: Streamlined three-phase submission pipeline (Initial, Revision, Camera-ready Final) with version history and live review feedback.
+- ⚖️ **Editorial & Reviewer Control Panel**: Comprehensive double-blind peer-review state machine, reviewer assignments, editorial decisions with file annotations, user role management, and transactional email logs.
 
-## Highlights
+---
 
-- **Full peer-review state machine** — `Submitted → Under Review → Revision Required →
-  Revised → Accepted → Final Submission → Approved → Published`, with a hard cap of 3 revision
-  rounds and a pre-review "returned for correction" loop that doesn't burn a revision.
-- **Double-blind by design** — reviewer identity never reaches the author, anywhere: not in the
-  UI, not in notifications, not in the audit trail.
-- **Three-stage author submission form** — New / Revised / Final Submission, each with exactly
-  the fields the editorial office needs (manuscript metadata, co-authors, contact info, and the
-  right file types per stage), looked up by Manuscript ID + registered email for revisions.
-- **Rich reviewer feedback** — admins write decisions in a lightweight bold/italic/bullet editor
-  and can attach a file (e.g. an annotated manuscript); both render identically in the app, in
-  notifications, and in the email the author receives.
-- **In-app notifications with a live unread count**, click-through straight to the relevant
-  submission, for both authors and admins.
-- **Admin console** — editorial triage queue, per-submission decision recording, user & role
-  management, a full searchable/paginated email delivery log (every transactional email, with
-  its exact rendered content viewable), and CSV export of the submissions table.
-- **Public archive** — published issues and papers, gated strictly on final admin approval.
-- **Branded transactional email** for every step of the pipeline, sent through a real SMTP
-  mailbox and logged (sent/failed) for diagnosis.
+## ⚡ Key Highlights & Architecture
 
-## Tech stack
+### 🛡️ Double-Blind Peer Review State Machine
+- Strict role-based isolation: Reviewer identities are protected server-side and never exposed to authors via API or notifications.
+- Formal status progression:
+  $$\text{New Submission} \longrightarrow \text{Under Review} \longrightarrow \begin{cases} \text{Revision Required} \longleftrightarrow \text{Revised} \\ \text{Accepted} \longrightarrow \text{Final Submission} \longrightarrow \text{Published} \\ \text{Rejected} \end{cases}$$
+- Pre-review correction loop (`RETURNED_FOR_CORRECTION`) allows authors to fix formatting and metadata without consuming one of their 3 revision attempts.
 
-| Layer | Technology |
-| --- | --- |
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS v4, react-router-dom, zustand, react-hook-form + zod |
-| Backend | Supabase — Postgres, Row-Level Security, Auth, 18 Edge Functions (Deno) |
-| File storage | Cloudflare R2 (S3-compatible, via `aws4fetch`) — manuscripts, revisions, reviewer attachments, copyright/payment files |
-| Email | Hostinger Business Email over SMTP (`denomailer`), every send logged to Postgres |
-| Hosting | Static frontend deployed to production at `jeri-spsu.co.in` |
+### 📝 Precision Submission Workflow
+- **New Submission**: Collects manuscript metadata, up to 6 co-authors with affiliations, designated corresponding author, and Word manuscript files.
+- **Revised Submission**: Looked up securely by Manuscript ID and registered author email, providing automated version tracking.
+- **Final Submission**: Collects camera-ready copy, executed copyright transfer agreement, and proof of publication fee payment.
 
-## How it's organized
+### 💬 Markdown Reviewer Feedback & File Annotations
+- Editors compose rich structured feedback with formatting (bold, italics, bullet points, headers).
+- Supports file attachments (e.g. annotated manuscripts or critique PDFs) delivered with secure, expiring pre-signed Cloudflare R2 download links.
+
+### 🔔 Live In-App Notifications
+- Real-time unread notification badge in the author and admin navigation headers.
+- Direct deep-links to specific manuscript reviews and editorial status updates.
+
+### 📬 Transactional Email Delivery Engine
+- Branded transactional emails dispatched on every lifecycle event (welcome, submission received, revisions requested, decisions reached).
+- Embedded high-resolution logo via inline MIME CID attachments (avoids aggressive Gmail image stripping).
+- Complete delivery log audit table in the Admin dashboard with raw rendered HTML preview inspection.
+
+---
+
+## 🛠️ Technology Stack
+
+| Ecosystem | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Frontend Framework** | React 19 + TypeScript 5 | Reactive, strongly typed component architecture |
+| **Bundler & Tooling** | Vite 6 | Lightning-fast HMR and optimized production bundling |
+| **Styling & Design** | Tailwind CSS v4 + Radix UI | Modern responsive glassmorphism, bespoke color design tokens |
+| **Animation & Icons** | Framer Motion + Lucide React | Micro-animations and unified iconography |
+| **Backend & Database** | Supabase (PostgreSQL 15) | Relational persistence, Row-Level Security (RLS), and database triggers |
+| **Serverless Compute** | 18 Deno Edge Functions | Isolated TypeScript microservices for auth, transitions, and mailers |
+| **Asset Storage** | Cloudflare R2 | S3-compatible, zero-egress bucket storage via `aws4fetch` |
+| **Email Transport** | Hostinger Business SMTP | High-deliverability transactional messaging with `denomailer` |
+
+---
+
+## 📂 Project Organization
 
 ```text
-.
-├── frontend/                  React + TypeScript + Vite application
+JERI_Journal-of-Emerging-Research-and-Innovation/
+├── frontend/                          # React 19 Frontend Web Application
+│   ├── public/                        # Static brand logos, favicons, and manifest
 │   └── src/
-│       ├── auth/               Session/auth context, Supabase-backed
+│       ├── @types/                    # TypeScript data definitions & domain models
+│       ├── auth/                      # Authentication context & session guards
 │       ├── components/
-│       │   ├── shared/          Status badges, notification bell, markdown feedback, dialogs…
-│       │   └── ui/               Radix-based design system primitives
-│       ├── services/supabase/  Typed client wrappers around tables + Edge Functions
-│       ├── configs/            Routes, navigation, theme
+│       │   ├── layouts/               # Public, Author, and Admin shell layouts
+│       │   ├── shared/                # Status badges, notification bell, feedback editor
+│       │   └── ui/                    # Base Radix & custom UI primitives
+│       ├── configs/                   # Route tables, navigation config, and theme tokens
+│       ├── services/supabase/         # Strongly typed database & Edge Function clients
 │       └── views/
-│           ├── public/          Home, archives, guidelines, editorial board, contact…
-│           ├── auth/            Sign up / sign in / password reset
-│           ├── author/          Paper Submission (New/Revised/Final), My Submissions
-│           └── admin/           Control Panel, Submissions, Users, Email Log
+│           ├── public/                # Home, Archives, Author Guidelines, Editorial Board
+│           ├── auth/                  # Sign In, Sign Up, Forgot/Reset Password
+│           ├── author/                # Paper Submission form, My Submissions dashboard
+│           └── admin/                 # Editorial triage, User management, Email delivery logs
 │
-└── backend/                   Supabase project (no server to deploy)
-    └── supabase/
-        ├── migrations/          Postgres schema + RLS, in order
-        └── functions/
-            ├── _shared/          Auth guard, state machine, R2 client, mailer, templates
-            └── …                 create-submission, assign-reviewer, record-reviewer-decision,
-                                   submit-revision, submit-final, final-approve, publish,
-                                   set-user-role, delete-user, get-download-url, and more
+├── backend/                           # Supabase Database & Serverless Functions
+│   └── supabase/
+│       ├── migrations/                # Versioned SQL migrations & authoritative schema
+│       └── functions/                 # Deno serverless edge functions
+│           ├── _shared/               # Auth guards, state machine, mailer engine, R2 client
+│           ├── assign-reviewer/       # Reviewer allocation logic
+│           ├── create-submission/     # Initial paper intake
+│           ├── record-reviewer-decision/ # Editorial decision recording
+│           ├── submit-revision/       # Revision uploads
+│           ├── submit-final/          # Camera-ready manuscript & copyright submission
+│           ├── publish/               # Issue release & paper publication
+│           ├── send-test-email/       # Diagnostic email testing tool
+│           └── delete-user/           # Admin account removal & cleanup
+│
+└── docs/                              # Architecture references and design documentation
 ```
 
-## Core workflow at a glance
+---
+
+## 🔄 Peer-Review State Machine
 
 ```mermaid
-flowchart LR
-    A[New Submission] --> B[Editorial Triage]
-    B -->|needs fixes| C[Returned for Correction]
-    C --> B
-    B -->|sent for review| D[Under Review]
-    D -->|revision needed| E[Revision Required]
-    E -->|author resubmits| D
-    D -->|accepted| F[Accepted]
-    D -->|rejected| G[Rejected]
-    F -->|final upload| H[Final Submission]
-    H -->|approved| I[Approved for Publication]
-    H -->|needs changes| H
-    I --> J[Published]
+flowchart TD
+    subgraph Submission Intake
+        A([📄 Author Submits Paper]) --> B[Editorial Triage Queue]
+        B -->|Formatting Issues| C[Returned for Correction]
+        C -->|Author Fixes Metadata| B
+    end
+
+    subgraph Peer Review Process
+        B -->|Assign Reviewers| D[Under Review]
+        D -->|Major / Minor Revision| E[Revision Required]
+        E -->|Author Submits Revision| D
+        D -->|Editorial Consensus| F{Decision}
+    end
+
+    subgraph Outcome & Publication
+        F -->|Decline| G[Rejected]
+        F -->|Accept Paper| H[Accepted]
+        H -->|Upload Camera-Ready & Docs| I[Final Submission]
+        I -->|Approved by Editor-in-Chief| J[Approved for Publication]
+        J -->|Assign Volume / Issue| K([🚀 Published in Public Archive])
+    end
+
+    style A fill:#0d74ce,stroke:#0d74ce,color:#fff
+    style K fill:#16a34a,stroke:#16a34a,color:#fff
+    style G fill:#eb8e90,stroke:#eb8e90,color:#fff
 ```
 
-Every arrow above is a real Edge Function call, gated by server-side role checks and the
-`statusTransitions.ts` state machine — the frontend never decides what's a legal transition.
+---
 
-## Running it locally
+## 🚀 Getting Started
 
-Requirements: Node.js, npm, and your own Supabase project (free tier works) if you want the
-backend live rather than just reading the UI.
+### Prerequisites
+- **Node.js** (v18.x or newer) & **npm**
+- **Supabase CLI** (optional, for local Edge Function testing)
 
+### 1. Frontend Setup
 ```bash
-cd frontend
+# Clone the repository
+git clone https://github.com/lakshhchopra/JERI_Journal-of-Emerging-Research-and-Innovation.git
+
+# Navigate into the frontend workspace
+cd JERI_Journal-of-Emerging-Research-and-Innovation/frontend
+
+# Install dependencies
 npm install
+
+# Copy environment template and populate Supabase credentials
+cp .env.example .env
+```
+
+Configure `frontend/.env`:
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+Run the development server:
+```bash
 npm run dev
 ```
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-Vite serves the app at `http://localhost:5173`. Point `frontend/.env` at your own Supabase
-project (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) — see `frontend/.env.example`.
-
-To stand up the backend yourself:
-
+### 2. Backend & Database Deployment
+Deploying schema and edge functions to your Supabase project:
 ```bash
 cd backend
-supabase link --project-ref <your-project-ref>
-supabase db push                     # applies every migration in order
-supabase functions deploy            # deploys all Edge Functions
+
+# Link your remote Supabase instance
+supabase link --project-ref your-project-id
+
+# Apply the consolidated schema migration
+supabase db push
+
+# Deploy all 18 Deno Edge Functions
+supabase functions deploy
+
+# Set function secrets (SMTP credentials, Cloudflare R2 tokens)
 supabase secrets set --env-file supabase/functions/.env.local
 ```
 
-Full setup details (SMTP, R2, secrets, and the manual verification checklist) live in
-[`backend/README.md`](backend/README.md).
-
-### Build
-
+### 3. Production Build
 ```bash
 cd frontend
 npm run build
 npm run preview
 ```
 
-## Access
+---
 
-- **Live site:** [jeri-spsu.co.in](https://jeri-spsu.co.in)
-- **Source:** this repository
-- Author and admin dashboards require a signed-in account; roles are assigned by an existing
-  admin via `/admin/users` (or directly in the Supabase dashboard to bootstrap the first one).
+## 🔒 Security & Privacy Practices
 
-## License
+- **Row-Level Security (RLS)**: Enforced across all PostgreSQL tables. Unauthenticated users can only query published manuscripts.
+- **Server-Side Authorization**: Edge functions verify user JWTs and validate administrative credentials before executing workflow mutations.
+- **Isolated Reviewers**: Identity masking guarantees single and double-blind integrity across all database views.
+- **Hashed Password Reset**: High-entropy, single-use, 30-minute expiring tokens stored as SHA-256 hashes.
 
-Published and maintained by Sir Padampat Singhania University, Udaipur. All rights reserved.
+---
+
+## 📜 Copyright & Governance
+
+Published and maintained by **Sir Padampat Singhania University (SPSU)**, Udaipur, Rajasthan, India.  
+All publication rights reserved. Open-access content licensed under standard academic fair-use and Creative Commons attribution guidelines.
