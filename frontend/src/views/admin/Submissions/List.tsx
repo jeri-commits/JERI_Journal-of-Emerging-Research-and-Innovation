@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CSVLink } from 'react-csv'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -20,6 +20,8 @@ import type { Submission, SubmissionStatus } from '@/@types/submissions'
 
 const AdminSubmissionsList: React.FC = () => {
     const navigate = useNavigate()
+    const [searchParams, setSearchParams] = useSearchParams()
+    const authorFilter = searchParams.get('authorId')
     const [submissions, setSubmissions] = useState<Submission[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
@@ -35,6 +37,7 @@ const AdminSubmissionsList: React.FC = () => {
 
     const filtered = useMemo(() => {
         return submissions.filter((s) => {
+            if (authorFilter && s.author_id !== authorFilter) return false
             const matchesStatus = statusFilter === 'ALL' || s.status === statusFilter
             const q = search.trim().toLowerCase()
             const matchesSearch =
@@ -43,7 +46,7 @@ const AdminSubmissionsList: React.FC = () => {
                 s.title.toLowerCase().includes(q)
             return matchesStatus && matchesSearch
         })
-    }, [submissions, search, statusFilter])
+    }, [submissions, search, statusFilter, authorFilter])
 
     const csvData = useMemo(
         () =>
@@ -60,7 +63,7 @@ const AdminSubmissionsList: React.FC = () => {
     )
 
     return (
-        <div className="p-6 max-w-6xl mx-auto space-y-6 font-sans">
+        <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-5 font-sans">
             <div className="flex items-start justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-ink">All Submissions</h1>
@@ -74,6 +77,18 @@ const AdminSubmissionsList: React.FC = () => {
                     <Download className="h-3.5 w-3.5" /> Export CSV
                 </CSVLink>
             </div>
+
+            {authorFilter && (
+                <div className="flex items-center gap-2 text-xs text-body">
+                    <span>Filtered to one author&apos;s submissions</span>
+                    <button
+                        className="text-text-link font-medium hover:underline"
+                        onClick={() => setSearchParams({})}
+                    >
+                        Clear filter
+                    </button>
+                </div>
+            )}
 
             <div className="flex flex-col md:flex-row gap-3">
                 <Input

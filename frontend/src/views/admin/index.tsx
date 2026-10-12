@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Chart from 'react-apexcharts'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -12,14 +11,28 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { useAuth } from '@/auth'
-import { Users, FileCheck, Clock, CheckCircle2 } from 'lucide-react'
+import { Users, FileCheck, Clock, CheckCircle2, Eye } from 'lucide-react'
 import StatusBadge from '@/components/shared/StatusBadge'
-import NotificationsPanel from '@/components/shared/NotificationsPanel'
 import { listAllSubmissions } from '@/services/supabase/submissions'
 import { listAllUsers } from '@/services/supabase/adminUsers'
 import { STATUS_LABELS } from '@/@types/submissions'
 import type { Submission, SubmissionStatus } from '@/@types/submissions'
 import type { AdminUserRow } from '@/services/supabase/adminUsers'
+
+const STATUS_BAR_COLOR: Partial<Record<SubmissionStatus, string>> = {
+    SUBMITTED: 'bg-slate-400',
+    RETURNED_FOR_CORRECTION: 'bg-red-400',
+    UNDER_REVIEW: 'bg-amber-400',
+    MAJOR_REVISION: 'bg-purple-400',
+    MINOR_REVISION: 'bg-purple-400',
+    REVISED_SUBMISSION: 'bg-slate-400',
+    ACCEPTED: 'bg-emerald-400',
+    REJECTED: 'bg-red-400',
+    FINAL_SUBMISSION: 'bg-amber-400',
+    RETURNED_FINAL: 'bg-red-400',
+    APPROVED_FOR_PUBLICATION: 'bg-emerald-400',
+    PUBLISHED: 'bg-emerald-500',
+}
 
 const PENDING_STATUSES = ['SUBMITTED', 'REVISED_SUBMISSION', 'FINAL_SUBMISSION', 'APPROVED_FOR_PUBLICATION']
 
@@ -47,11 +60,22 @@ const AdminDashboard: React.FC = () => {
     const statusCounts = useMemo(() => {
         const counts = new Map<SubmissionStatus, number>()
         for (const s of submissions) counts.set(s.status, (counts.get(s.status) ?? 0) + 1)
-        return Array.from(counts.entries()).filter(([, count]) => count > 0)
+        return Array.from(counts.entries())
+            .filter(([, count]) => count > 0)
+            .sort((a, b) => b[1] - a[1])
     }, [submissions])
+    const maxStatusCount = Math.max(1, ...statusCounts.map(([, count]) => count))
+
+    const recentSubmissions = useMemo(
+        () =>
+            [...submissions]
+                .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                .slice(0, 5),
+        [submissions],
+    )
 
     return (
-        <div className="p-6 space-y-8 max-w-7xl mx-auto font-sans">
+        <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto font-sans">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-hairline pb-6">
                 <div>
                     <h1 className="text-display-lg text-ink dark:text-on-dark font-semibold">
@@ -63,7 +87,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Pending Triage</CardTitle>
@@ -111,27 +135,28 @@ const AdminDashboard: React.FC = () => {
                     <CardHeader>
                         <CardTitle>Submissions by Status</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <Chart
-                            type="bar"
-                            height={260}
-                            options={{
-                                chart: { toolbar: { show: false } },
-                                plotOptions: { bar: { borderRadius: 4, horizontal: true } },
-                                xaxis: {
-                                    categories: statusCounts.map(([status]) => STATUS_LABELS[status]),
-                                },
-                                dataLabels: { enabled: true },
-                                colors: ['#0d74ce'],
-                                grid: { strokeDashArray: 4 },
-                            }}
-                            series={[{ name: 'Submissions', data: statusCounts.map(([, count]) => count) }]}
-                        />
+                    <CardContent className="space-y-2.5">
+                        {statusCounts.map(([status, count]) => (
+                            <div key={status} className="flex items-center gap-3">
+                                <span className="text-xs text-body w-40 shrink-0 truncate">
+                                    {STATUS_LABELS[status]}
+                                </span>
+                                <div className="flex-1 h-2.5 rounded-full bg-surface-strong overflow-hidden">
+                                    <div
+                                        className={`h-full rounded-full ${STATUS_BAR_COLOR[status] ?? 'bg-primary'}`}
+                                        style={{ width: `${(count / maxStatusCount) * 100}%` }}
+                                    />
+                                </div>
+                                <span className="text-xs font-semibold text-ink w-6 text-right shrink-0">
+                                    {count}
+                                </span>
+                            </div>
+                        ))}
                     </CardContent>
                 </Card>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="lg:col-span-2">
                     <Card>
                         <CardHeader>
@@ -184,9 +209,42 @@ const AdminDashboard: React.FC = () => {
                     </Card>
                 </div>
                 <div>
-                    {user?.userId && (
-                        <NotificationsPanel userId={user.userId} basePath="/admin/submissions" />
-                    )}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Recent Submissions</CardTitle>
+                            <p className="text-sm text-body dark:text-on-dark-soft">
+                                The 5 most recently submitted manuscripts.
+                            </p>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            {loading && <p className="text-sm text-body">Loading…</p>}
+                            {!loading && recentSubmissions.length === 0 && (
+                                <p className="text-sm text-body">No submissions yet.</p>
+                            )}
+                            {recentSubmissions.map((s) => (
+                                <button
+                                    key={s.id}
+                                    type="button"
+                                    onClick={() => navigate(`/admin/submissions/${s.id}`)}
+                                    className="w-full text-left p-2.5 rounded-lg border border-hairline hover:bg-surface-strong transition-colors space-y-1"
+                                >
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span className="text-xs font-semibold text-text-link">{s.submission_code}</span>
+                                        <StatusBadge status={s.status} />
+                                    </div>
+                                    <p className="text-xs text-ink line-clamp-1">{s.title}</p>
+                                    <p className="text-[11px] text-body/70">
+                                        {new Date(s.created_at).toLocaleDateString()}
+                                    </p>
+                                </button>
+                            ))}
+                            <div className="pt-1 text-right">
+                                <Button variant="link" size="sm" onClick={() => navigate('/admin/submissions')} className="gap-1">
+                                    View all <Eye className="h-3.5 w-3.5" />
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </div>

@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Alert } from '@/components/ui/Alert'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Download, Paperclip, Send } from 'lucide-react'
 import StatusBadge from '@/components/shared/StatusBadge'
 import SubmissionTimeline from '@/components/shared/SubmissionTimeline'
 import ManuscriptVersionList from '@/components/shared/ManuscriptVersionList'
+import MarkdownFeedback from '@/components/shared/MarkdownFeedback'
+import FeedbackEditor from '@/components/shared/FeedbackEditor'
+import DecisionBadge from '@/components/shared/DecisionBadge'
 import { getSubmissionDetail } from '@/services/supabase/submissions'
 import { supabase } from '@/configs/supabase.config'
 import {
@@ -16,6 +18,7 @@ import {
     recordReviewerDecision,
     finalApprove,
     publishSubmission,
+    getFeedbackAttachmentUrl,
 } from '@/services/supabase/workflow'
 import type { ReviewerDecision, SubmissionDetail } from '@/@types/submissions'
 
@@ -29,12 +32,23 @@ const AdminSubmissionDetail: React.FC = () => {
     const [busy, setBusy] = useState(false)
 
     const [correctionComments, setCorrectionComments] = useState('')
-    const [reviewerName, setReviewerName] = useState('')
-    const [reviewerEmail, setReviewerEmail] = useState('')
-    const [reviewerInstitution, setReviewerInstitution] = useState('')
     const [decision, setDecision] = useState<ReviewerDecision>('MINOR_REVISION')
     const [decisionFeedback, setDecisionFeedback] = useState('')
+    const [decisionAttachment, setDecisionAttachment] = useState<File | null>(null)
     const [finalComments, setFinalComments] = useState('')
+    const [downloadingFeedbackId, setDownloadingFeedbackId] = useState<string | null>(null)
+
+    const handleDownloadFeedbackAttachment = async (feedbackId: string) => {
+        setDownloadingFeedbackId(feedbackId)
+        try {
+            const { url } = await getFeedbackAttachmentUrl(feedbackId)
+            window.open(url, '_blank', 'noopener,noreferrer')
+        } catch (err) {
+            setError((err as Error).message)
+        } finally {
+            setDownloadingFeedbackId(null)
+        }
+    }
 
     const load = () => {
         if (!id) return
@@ -68,10 +82,10 @@ const AdminSubmissionDetail: React.FC = () => {
         }
     }
 
-    if (loading) return <div className="p-6">Loading…</div>
+    if (loading) return <div className="p-4 sm:p-6">Loading…</div>
     if (error && !submission) {
         return (
-            <div className="p-6 max-w-4xl mx-auto">
+            <div className="p-4 sm:p-6 max-w-4xl mx-auto">
                 <Alert showIcon type="danger">{error}</Alert>
             </div>
         )
@@ -81,15 +95,15 @@ const AdminSubmissionDetail: React.FC = () => {
     const { status } = submission
 
     return (
-        <div className="p-6 max-w-4xl mx-auto space-y-6 font-sans">
+        <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-5 font-sans">
             <Button variant="ghost" size="sm" onClick={() => navigate('/admin/submissions')}>
                 <ArrowLeft className="h-3.5 w-3.5 mr-1.5" /> Back to all submissions
             </Button>
 
             <div className="flex items-start justify-between gap-4">
-                <div>
+                <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-text-link">{submission.submission_code}</p>
-                    <h1 className="text-2xl font-bold text-ink">{submission.title}</h1>
+                    <h1 className="text-2xl font-bold text-ink break-words">{submission.title}</h1>
                     <p className="text-sm text-body">Author: {authorEmail || submission.author_id}</p>
                 </div>
                 <StatusBadge status={status} />
@@ -98,16 +112,15 @@ const AdminSubmissionDetail: React.FC = () => {
             {error && <Alert showIcon type="danger">{error}</Alert>}
 
             {status === 'SUBMITTED' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Card>
                         <CardHeader><CardTitle>Return for Correction</CardTitle></CardHeader>
                         <CardContent className="space-y-3">
-                            <textarea
+                            <FeedbackEditor
                                 rows={3}
-                                className="w-full rounded-md border border-hairline-strong bg-canvas p-3 text-sm text-ink focus:outline-none"
                                 placeholder="Describe what the author needs to fix…"
                                 value={correctionComments}
-                                onChange={(e) => setCorrectionComments(e.target.value)}
+                                onChange={setCorrectionComments}
                             />
                             <Button
                                 variant="outline"
@@ -118,47 +131,17 @@ const AdminSubmissionDetail: React.FC = () => {
                             </Button>
                         </CardContent>
                     </Card>
-                    <ReviewerAssignmentCard
+                    <SendForReviewCard
                         busy={busy}
-                        reviewerName={reviewerName}
-                        reviewerEmail={reviewerEmail}
-                        reviewerInstitution={reviewerInstitution}
-                        setReviewerName={setReviewerName}
-                        setReviewerEmail={setReviewerEmail}
-                        setReviewerInstitution={setReviewerInstitution}
-                        onAssign={() =>
-                            runAction(() =>
-                                assignReviewer({
-                                    submissionId: submission.id,
-                                    reviewerName,
-                                    reviewerEmail,
-                                    reviewerInstitution,
-                                }),
-                            )
-                        }
+                        onSend={() => runAction(() => assignReviewer(submission.id))}
                     />
                 </div>
             )}
 
             {status === 'REVISED_SUBMISSION' && (
-                <ReviewerAssignmentCard
+                <SendForReviewCard
                     busy={busy}
-                    reviewerName={reviewerName}
-                    reviewerEmail={reviewerEmail}
-                    reviewerInstitution={reviewerInstitution}
-                    setReviewerName={setReviewerName}
-                    setReviewerEmail={setReviewerEmail}
-                    setReviewerInstitution={setReviewerInstitution}
-                    onAssign={() =>
-                        runAction(() =>
-                            assignReviewer({
-                                submissionId: submission.id,
-                                reviewerName,
-                                reviewerEmail,
-                                reviewerInstitution,
-                            }),
-                        )
-                    }
+                    onSend={() => runAction(() => assignReviewer(submission.id))}
                 />
             )}
 
@@ -167,7 +150,7 @@ const AdminSubmissionDetail: React.FC = () => {
                     <CardHeader>
                         <CardTitle>Record Reviewer Decision</CardTitle>
                         <p className="text-xs text-body">
-                            Reviewer: {submission.reviewer_name} &lt;{submission.reviewer_email}&gt;
+                            Enter the outcome the reviewer sent back by email.
                         </p>
                     </CardHeader>
                     <CardContent className="space-y-3">
@@ -181,23 +164,27 @@ const AdminSubmissionDetail: React.FC = () => {
                             <option value="ACCEPTED">Accepted</option>
                             <option value="REJECTED">Rejected</option>
                         </select>
-                        <textarea
+                        <FeedbackEditor
                             rows={3}
-                            className="w-full rounded-md border border-hairline-strong bg-canvas p-3 text-sm text-ink focus:outline-none"
-                            placeholder="Reviewer feedback…"
+                            placeholder="Reviewer feedback… (bold/italic/bullets supported)"
                             value={decisionFeedback}
-                            onChange={(e) => setDecisionFeedback(e.target.value)}
+                            onChange={setDecisionFeedback}
+                            attachment={decisionAttachment}
+                            onAttachmentChange={setDecisionAttachment}
                         />
                         <Button
                             disabled={busy || !decisionFeedback.trim()}
                             onClick={() =>
-                                runAction(() =>
-                                    recordReviewerDecision({
+                                runAction(async () => {
+                                    await recordReviewerDecision({
                                         submissionId: submission.id,
                                         decision,
                                         feedback: decisionFeedback,
-                                    }),
-                                )
+                                        attachment: decisionAttachment ?? undefined,
+                                    })
+                                    setDecisionFeedback('')
+                                    setDecisionAttachment(null)
+                                })
                             }
                         >
                             Record Decision
@@ -210,12 +197,11 @@ const AdminSubmissionDetail: React.FC = () => {
                 <Card>
                     <CardHeader><CardTitle>Final Submission Decision</CardTitle></CardHeader>
                     <CardContent className="space-y-3">
-                        <textarea
+                        <FeedbackEditor
                             rows={2}
-                            className="w-full rounded-md border border-hairline-strong bg-canvas p-3 text-sm text-ink focus:outline-none"
                             placeholder="Comments (required for return/reject)…"
                             value={finalComments}
-                            onChange={(e) => setFinalComments(e.target.value)}
+                            onChange={setFinalComments}
                         />
                         <div className="flex gap-3">
                             <Button
@@ -288,12 +274,44 @@ const AdminSubmissionDetail: React.FC = () => {
 
             {submission.reviewer_feedback.length > 0 && (
                 <Card>
-                    <CardHeader><CardTitle>Reviewer Feedback History</CardTitle></CardHeader>
-                    <CardContent className="space-y-3">
-                        {submission.reviewer_feedback.map((f) => (
-                            <div key={f.id} className="p-3 bg-surface-card border border-hairline rounded-xl text-sm">
-                                <p className="font-semibold text-ink">{f.decision.replace('_', ' ')}</p>
-                                <p className="text-body">{f.feedback}</p>
+                    <CardHeader>
+                        <CardTitle>Review Rounds</CardTitle>
+                        <p className="text-xs text-body">
+                            {submission.reviewer_feedback.length} decision{submission.reviewer_feedback.length === 1 ? '' : 's'} recorded so far.
+                        </p>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {submission.reviewer_feedback.map((f, i) => (
+                            <div key={f.id} className="relative pl-5">
+                                {i < submission.reviewer_feedback.length - 1 && (
+                                    <div className="absolute left-[7px] top-6 bottom-[-16px] w-px bg-hairline-strong" />
+                                )}
+                                <div className="absolute left-0 top-1 h-3.5 w-3.5 rounded-full border-2 border-primary bg-surface-card" />
+                                <div className="p-3 bg-surface-card border border-hairline rounded-xl text-sm space-y-2">
+                                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-semibold text-body">Round {i + 1}</span>
+                                            <DecisionBadge decision={f.decision} />
+                                        </div>
+                                        <span className="text-[11px] text-body/70">
+                                            {new Date(f.created_at).toLocaleString()}
+                                        </span>
+                                    </div>
+                                    <MarkdownFeedback text={f.feedback} />
+                                    {f.attachment_name && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="gap-1.5"
+                                            disabled={downloadingFeedbackId === f.id}
+                                            onClick={() => handleDownloadFeedbackAttachment(f.id)}
+                                        >
+                                            <Paperclip className="h-3 w-3" />
+                                            {f.attachment_name}
+                                            <Download className="h-3 w-3" />
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
                         ))}
                     </CardContent>
@@ -310,35 +328,18 @@ const AdminSubmissionDetail: React.FC = () => {
     )
 }
 
-type ReviewerAssignmentCardProps = {
-    busy: boolean
-    reviewerName: string
-    reviewerEmail: string
-    reviewerInstitution: string
-    setReviewerName: (v: string) => void
-    setReviewerEmail: (v: string) => void
-    setReviewerInstitution: (v: string) => void
-    onAssign: () => void
-}
-
-const ReviewerAssignmentCard = ({
-    busy,
-    reviewerName,
-    reviewerEmail,
-    reviewerInstitution,
-    setReviewerName,
-    setReviewerEmail,
-    setReviewerInstitution,
-    onAssign,
-}: ReviewerAssignmentCardProps) => (
+const SendForReviewCard = ({ busy, onSend }: { busy: boolean; onSend: () => void }) => (
     <Card>
-        <CardHeader><CardTitle>Assign Reviewer</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-            <Input placeholder="Reviewer name" value={reviewerName} onChange={(e) => setReviewerName(e.target.value)} />
-            <Input type="email" placeholder="Reviewer email" value={reviewerEmail} onChange={(e) => setReviewerEmail(e.target.value)} />
-            <Input placeholder="Institution (optional)" value={reviewerInstitution} onChange={(e) => setReviewerInstitution(e.target.value)} />
-            <Button disabled={busy || !reviewerName.trim() || !reviewerEmail.trim()} onClick={onAssign}>
-                Send for Review
+        <CardHeader>
+            <CardTitle>Send for Review</CardTitle>
+            <p className="text-xs text-body">
+                Download the manuscript above and send it to your reviewer directly. Once
+                they've replied, come back here to record their decision.
+            </p>
+        </CardHeader>
+        <CardContent>
+            <Button disabled={busy} onClick={onSend} className="gap-1.5">
+                <Send className="h-3.5 w-3.5" /> Send for Review
             </Button>
         </CardContent>
     </Card>
