@@ -110,14 +110,8 @@ export async function submitFinal(params: {
     title?: string
     abstract?: string
     file: File
-    copyrightForm: File
-    paymentSlip: File
 }) {
-    const [fileBase64, copyrightFormBase64, paymentSlipBase64] = await Promise.all([
-        readFileAsBase64(params.file),
-        readFileAsBase64(params.copyrightForm),
-        readFileAsBase64(params.paymentSlip),
-    ])
+    const fileBase64 = await readFileAsBase64(params.file)
     return invoke<{ status: string }>('submit-final', {
         submissionId: params.submissionId,
         title: params.title,
@@ -125,12 +119,6 @@ export async function submitFinal(params: {
         fileName: params.file.name,
         mimeType: params.file.type,
         fileBase64,
-        copyrightFormFileName: params.copyrightForm.name,
-        copyrightFormMimeType: params.copyrightForm.type,
-        copyrightFormBase64,
-        paymentSlipFileName: params.paymentSlip.name,
-        paymentSlipMimeType: params.paymentSlip.type,
-        paymentSlipBase64,
     })
 }
 
@@ -141,22 +129,38 @@ export async function returnForCorrection(submissionId: string, comments: string
     })
 }
 
-export async function assignReviewer(params: {
-    submissionId: string
-    reviewerName: string
-    reviewerEmail: string
-    reviewerInstitution?: string
-    reviewerNotes?: string
-}) {
-    return invoke<{ status: string }>('assign-reviewer', params)
+export async function assignReviewer(submissionId: string) {
+    return invoke<{ status: string }>('assign-reviewer', { submissionId })
 }
 
 export async function recordReviewerDecision(params: {
     submissionId: string
     decision: ReviewerDecision
     feedback: string
+    attachment?: File
 }) {
-    return invoke<{ status: string }>('record-reviewer-decision', params)
+    const { attachment, ...rest } = params
+    const attachmentFields = attachment
+        ? {
+              attachmentFileName: attachment.name,
+              attachmentMimeType: attachment.type,
+              attachmentBase64: await readFileAsBase64(attachment),
+          }
+        : {}
+    return invoke<{ status: string }>('record-reviewer-decision', {
+        ...rest,
+        ...attachmentFields,
+    })
+}
+
+export async function getFeedbackAttachmentUrl(feedbackId: string) {
+    return invoke<{ url: string; fileName: string }>('get-feedback-attachment-url', {
+        feedbackId,
+    })
+}
+
+export async function deleteUser(userId: string) {
+    return invoke<{ status: string }>('delete-user', { userId })
 }
 
 export async function finalApprove(params: {

@@ -6,7 +6,7 @@ import type {
 } from '@/@types/submissions'
 
 const SUBMISSION_COLUMNS =
-    'id, submission_code, author_id, title, abstract, paper_type, submission_mode, keywords, category, journal_section, status, revision_count, current_version_id, reviewer_name, reviewer_email, reviewer_institution, reviewer_notes, contact_phone, address_line1, address_line2, city, state_province, postal_code, contact_country, copyright_form_key, payment_slip_key, created_at, updated_at, submitted_at, accepted_at, rejected_at, published_at'
+    'id, submission_code, author_id, title, abstract, paper_type, submission_mode, keywords, category, journal_section, status, revision_count, current_version_id, reviewer_name, reviewer_email, reviewer_institution, reviewer_notes, contact_phone, address_line1, address_line2, city, state_province, postal_code, contact_country, copyright_form_key, payment_slip_key, latest_feedback_note, latest_feedback_at, created_at, updated_at, submitted_at, accepted_at, rejected_at, published_at'
 
 /** Every submission belonging to the signed-in author (RLS already
  * scopes this to their own rows -- no author_id filter needed, but it's

@@ -54,6 +54,8 @@ export type Submission = {
     contact_country: string | null
     copyright_form_key: string | null
     payment_slip_key: string | null
+    latest_feedback_note: string | null
+    latest_feedback_at: string | null
     created_at: string
     updated_at: string
     submitted_at: string | null
@@ -97,6 +99,8 @@ export type ReviewerFeedback = {
     decision: ReviewerDecision
     created_by: string
     created_at: string
+    attachment_key: string | null
+    attachment_name: string | null
 }
 
 export type SubmissionHistoryEntry = {
