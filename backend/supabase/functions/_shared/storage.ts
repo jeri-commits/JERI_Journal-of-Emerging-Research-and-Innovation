@@ -96,6 +96,16 @@ export function buildAttachmentObjectKey(
     return `papers/${submissionCode}/attachments/${kind}/${sanitizeFileName(fileName)}`
 }
 
+/** Reviewer-feedback attachments (e.g. an annotated manuscript the admin
+ * attaches to a revision decision). Timestamped so repeated decisions on
+ * the same submission never collide on the same key. */
+export function buildFeedbackAttachmentObjectKey(
+    submissionCode: string,
+    fileName: string,
+): string {
+    return `papers/${submissionCode}/feedback/${Date.now()}-${sanitizeFileName(fileName)}`
+}
+
 /** Uploads manuscript bytes to R2. Throws on failure -- callers are
  * responsible for not leaving an orphaned DB row if this fails. */
 export async function uploadManuscript(
