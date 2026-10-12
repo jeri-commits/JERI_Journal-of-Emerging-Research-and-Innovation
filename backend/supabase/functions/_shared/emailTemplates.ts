@@ -14,8 +14,20 @@ function submissionLink(submissionId: string): string {
  * URL) so the mark renders in the recipient's inbox even before this
  * app has a public domain -- a `src="${APP_URL}/..."` pointing at
  * localhost would just show a broken image icon in a real mail client. */
+/** Collapses the template literal's indentation/newlines before it goes
+ * to the mailer. Without this, lines in the multi-line HTML can end in
+ * trailing whitespace, which quoted-printable encodes as a literal
+ * "=20" -- some clients (seen in Gmail) then fail to decode that back
+ * into a space and show the raw escape sequence in the rendered email. */
+function minifyHtml(html: string): string {
+    return html
+        .split('\n')
+        .map((line) => line.trim())
+        .join('')
+}
+
 function layout(heading: string, bodyHtml: string, preheader = ''): string {
-    return `<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -58,10 +70,52 @@ function layout(heading: string, bodyHtml: string, preheader = ''): string {
     </table>
   </body>
 </html>`
+    return minifyHtml(html)
 }
 
 function p(text: string): string {
     return `<p style="font-size:14px;color:#475569;line-height:1.65;margin:0 0 16px;">${text}</p>`
+}
+
+function escapeHtml(text: string): string {
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+}
+
+/** A deliberately tiny markdown subset -- **bold**, *italic*, and "- "
+ * bullet lines -- matching the same three buttons the admin's feedback
+ * editor offers. Not a general markdown parser; just enough to carry
+ * reviewer-feedback formatting into the email the author receives. */
+function renderFeedback(markdown: string): string {
+    const lines = markdown.split('\n')
+    const htmlLines: string[] = []
+    let inList = false
+    for (const rawLine of lines) {
+        const line = rawLine.trim()
+        if (line.startsWith('- ')) {
+            if (!inList) {
+                htmlLines.push('<ul style="margin:0 0 12px;padding-left:20px;">')
+                inList = true
+            }
+            htmlLines.push(`<li style="margin-bottom:4px;">${inlineMarkdown(line.slice(2))}</li>`)
+            continue
+        }
+        if (inList) {
+            htmlLines.push('</ul>')
+            inList = false
+        }
+        if (line) htmlLines.push(`<div>${inlineMarkdown(line)}</div>`)
+    }
+    if (inList) htmlLines.push('</ul>')
+    return htmlLines.join('')
+}
+
+function inlineMarkdown(text: string): string {
+    return escapeHtml(text)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
 }
 
 function metaBlock(submissionCode: string, title: string): string {
@@ -170,7 +224,8 @@ export const EmailService = {
                     'The editorial office has reviewed your submission and found the following issues that need correction before it can proceed to peer review:',
                 ) +
                 metaBlock(submissionCode, title) +
-                p(`<strong>Editorial comments:</strong><br/>${comments}`) +
+                p(`<strong>Editorial comments:</strong>`) +
+                renderFeedback(comments) +
                 button(submissionLink(submissionCode), 'View & Correct'),
         )
         await sendMail(
@@ -188,6 +243,7 @@ export const EmailService = {
         decision: 'MAJOR_REVISION' | 'MINOR_REVISION',
         feedback: string,
         revisionCount: number,
+        attachmentName: string | null = null,
     ) {
         const label = decision === 'MAJOR_REVISION' ? 'Major' : 'Minor'
         const html = layout(
@@ -197,7 +253,11 @@ export const EmailService = {
                     `Following peer review, the editorial office requires a ${label.toLowerCase()} revision of your manuscript (revision ${revisionCount + 1} of 3 allowed).`,
                 ) +
                 metaBlock(submissionCode, title) +
-                p(`<strong>Reviewer feedback:</strong><br/>${feedback}`) +
+                p(`<strong>Reviewer feedback:</strong>`) +
+                renderFeedback(feedback) +
+                (attachmentName
+                    ? p(`A file was attached to this feedback (<strong>${escapeHtml(attachmentName)}</strong>) — download it from the submission page.`)
+                    : '') +
                 button(submissionLink(submissionCode), 'Submit Revision'),
         )
         await sendMail(
@@ -242,7 +302,8 @@ export const EmailService = {
                     'After careful review, the editorial office has decided not to proceed with your manuscript.',
                 ) +
                 metaBlock(submissionCode, title) +
-                p(`<strong>Reviewer feedback:</strong><br/>${feedback}`),
+                p(`<strong>Reviewer feedback:</strong>`) +
+                renderFeedback(feedback),
         )
         await sendMail(to, `Submission Decision — ${submissionCode}`, html)
     },
@@ -261,7 +322,8 @@ export const EmailService = {
                     'The editorial office reviewed your final submission and requires changes before it can be approved for publication.',
                 ) +
                 metaBlock(submissionCode, title) +
-                p(`<strong>Comments:</strong><br/>${comments}`) +
+                p(`<strong>Comments:</strong>`) +
+                renderFeedback(comments) +
                 button(submissionLink(submissionCode), 'Upload Corrected Final Version'),
         )
         await sendMail(

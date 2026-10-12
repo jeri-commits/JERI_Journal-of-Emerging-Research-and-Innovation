@@ -20,7 +20,7 @@ export async function sendMail(
     const fromEmail = Deno.env.get('SMTP_FROM_EMAIL')
 
     if (!fromEmail) {
-        await logEmail(to, subject, 'failed', 'SMTP_FROM_EMAIL is not configured.', submissionId)
+        await logEmail(to, subject, 'failed', 'SMTP_FROM_EMAIL is not configured.', submissionId, html)
         return
     }
 
@@ -58,10 +58,10 @@ export async function sendMail(
                 },
             ],
         })
-        await logEmail(to, subject, 'sent', null, submissionId)
+        await logEmail(to, subject, 'sent', null, submissionId, html)
     } catch (err) {
         console.error(`Failed to send email to ${to} ("${subject}"):`, err)
-        await logEmail(to, subject, 'failed', (err as Error).message, submissionId)
+        await logEmail(to, subject, 'failed', (err as Error).message, submissionId, html)
     } finally {
         try {
             await client.close()
@@ -77,6 +77,7 @@ async function logEmail(
     status: 'sent' | 'failed',
     errorMessage: string | null,
     submissionId: string | null,
+    bodyHtml: string,
 ) {
     const { error } = await supabaseAdmin.from('email_log').insert({
         to_email: to,
@@ -84,6 +85,7 @@ async function logEmail(
         status,
         error_message: errorMessage,
         submission_id: submissionId,
+        body_html: bodyHtml,
     })
     if (error) console.error('Failed to write email_log row:', error)
 }
