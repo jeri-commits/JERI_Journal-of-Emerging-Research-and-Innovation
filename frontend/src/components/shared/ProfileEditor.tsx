@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Alert } from '@/components/ui/Alert'
 import { useAuth } from '@/auth'
+import { useSessionUser } from '@/store/authStore'
 import { getFullProfile, updateMyProfile } from '@/services/supabase/profiles'
 import type { FullProfile, ProfileEditableFields } from '@/services/supabase/profiles'
 
@@ -14,10 +15,12 @@ const emptyFields: ProfileEditableFields = {
     bio: '',
 }
 
-/** Shared by /author/profile and /admin/profile -- same fields for both
- * personas; only the role badge shown around it differs. */
+/** Used by /admin/profile. Authors manage their name/password through the
+ * lightweight AccountDialog instead (opened from the header avatar) --
+ * authors have nothing else on their profile worth a dedicated page. */
 const ProfileEditor: React.FC = () => {
     const { user } = useAuth()
+    const setUser = useSessionUser((state) => state.setUser)
     const [profile, setProfile] = useState<FullProfile | null>(null)
     const [fields, setFields] = useState<ProfileEditableFields>(emptyFields)
     const [loading, setLoading] = useState(true)
@@ -49,6 +52,11 @@ const ProfileEditor: React.FC = () => {
         setMessage('')
         try {
             await updateMyProfile(user.userId, fields)
+            // Keep the header (and anywhere else `user.userName` is read)
+            // in sync immediately -- without this, a name change here only
+            // shows up after the next sign-in, since nothing re-fetches
+            // the profile otherwise.
+            setUser({ ...user, userName: fields.full_name || undefined })
             setMessage('Profile updated.')
         } catch (err) {
             setError((err as Error).message)

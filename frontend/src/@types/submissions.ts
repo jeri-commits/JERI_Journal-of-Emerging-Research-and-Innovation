@@ -20,12 +20,21 @@ export type ReviewerDecision =
     | 'REJECTED'
     | 'ACCEPTED'
 
+export type PaperType =
+    | 'Research Article'
+    | 'Review Article'
+    | 'Survey Article'
+    | 'Short Communication'
+    | 'Others'
+
 export type Submission = {
     id: string
     submission_code: string
     author_id: string
     title: string
     abstract: string
+    paper_type: PaperType | null
+    submission_mode: string | null
     keywords: string[]
     category: string | null
     journal_section: string | null
@@ -36,6 +45,15 @@ export type Submission = {
     reviewer_email: string | null
     reviewer_institution: string | null
     reviewer_notes: string | null
+    contact_phone: string | null
+    address_line1: string | null
+    address_line2: string | null
+    city: string | null
+    state_province: string | null
+    postal_code: string | null
+    contact_country: string | null
+    copyright_form_key: string | null
+    payment_slip_key: string | null
     created_at: string
     updated_at: string
     submitted_at: string | null
@@ -51,6 +69,8 @@ export type SubmissionAuthor = {
     email: string
     affiliation: string | null
     institution: string | null
+    department: string | null
+    country: string | null
     author_order: number
     corresponding_author: boolean
 }

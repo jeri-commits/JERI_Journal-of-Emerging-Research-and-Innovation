@@ -184,7 +184,7 @@ const AdminEmailLog: React.FC = () => {
                                 {rows.map((r) => (
                                     <TableRow key={r.id}>
                                         <TableCell>{r.to_email}</TableCell>
-                                        <TableCell className="max-w-xs truncate">{r.subject}</TableCell>
+                                        <TableCell className="max-w-[20rem] truncate">{r.subject}</TableCell>
                                         <TableCell>
                                             <Badge variant={r.status === 'sent' ? 'success' : 'destructive'}>
                                                 {r.status}

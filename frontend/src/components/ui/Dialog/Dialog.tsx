@@ -29,7 +29,7 @@ const Dialog: React.FC<DialogProps> = ({
             isOpen={isOpen}
             onRequestClose={handleClose}
             ariaHideApp={false}
-            className="outline-none max-w-lg w-full mx-auto"
+            className="outline-none max-w-[32rem] w-full mx-auto"
             overlayClassName="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
         >
             <div className={classNames('bg-canvas dark:bg-surface-dark border border-hairline-strong rounded-xl shadow-xl overflow-hidden relative w-full', className)}>

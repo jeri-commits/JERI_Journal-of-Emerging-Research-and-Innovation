@@ -13,9 +13,11 @@ import {
 import { assertTransition } from '../_shared/statusTransitions.ts'
 import {
     buildObjectKey,
+    buildAttachmentObjectKey,
     uploadManuscript,
     deleteManuscript,
     validateManuscriptFile,
+    validateAttachmentFile,
 } from '../_shared/storage.ts'
 import { recordHistory } from '../_shared/history.ts'
 import { notifyAllAdmins, listAdmins } from '../_shared/notifications.ts'
@@ -23,9 +25,17 @@ import { EmailService } from '../_shared/emailTemplates.ts'
 
 type RequestBody = {
     submissionId: string
+    title?: string
+    abstract?: string
     fileName: string
     mimeType: string
     fileBase64: string
+    copyrightFormFileName: string
+    copyrightFormMimeType: string
+    copyrightFormBase64: string
+    paymentSlipFileName: string
+    paymentSlipMimeType: string
+    paymentSlipBase64: string
 }
 
 Deno.serve(async (req) => {
@@ -52,6 +62,18 @@ Deno.serve(async (req) => {
             body.mimeType,
             estimateBase64Bytes(body.fileBase64),
         )
+        validateAttachmentFile(
+            'Copyright form',
+            body.copyrightFormFileName,
+            body.copyrightFormMimeType,
+            estimateBase64Bytes(body.copyrightFormBase64),
+        )
+        validateAttachmentFile(
+            'Payment slip',
+            body.paymentSlipFileName,
+            body.paymentSlipMimeType,
+            estimateBase64Bytes(body.paymentSlipBase64),
+        )
 
         const versionNumber = await nextVersionNumber(submission.id)
         const objectKey = buildObjectKey(
@@ -60,11 +82,31 @@ Deno.serve(async (req) => {
             body.fileName,
         )
         const bytes = decodeFileBase64(body.fileBase64)
+        const copyrightFormKey = buildAttachmentObjectKey(
+            submission.submission_code,
+            'copyright-form',
+            body.copyrightFormFileName,
+        )
+        const paymentSlipKey = buildAttachmentObjectKey(
+            submission.submission_code,
+            'payment-slip',
+            body.paymentSlipFileName,
+        )
 
         try {
             await uploadManuscript(objectKey, bytes, body.mimeType)
+            await uploadManuscript(
+                copyrightFormKey,
+                decodeFileBase64(body.copyrightFormBase64),
+                body.copyrightFormMimeType,
+            )
+            await uploadManuscript(
+                paymentSlipKey,
+                decodeFileBase64(body.paymentSlipBase64),
+                body.paymentSlipMimeType,
+            )
         } catch (uploadErr) {
-            throw new Error(`Manuscript upload failed: ${(uploadErr as Error).message}`)
+            throw new Error(`Upload failed: ${(uploadErr as Error).message}`)
         }
 
         const { data: version, error: versionError } = await supabaseAdmin
@@ -96,6 +138,10 @@ Deno.serve(async (req) => {
             .update({
                 current_version_id: version.id,
                 status: 'FINAL_SUBMISSION',
+                copyright_form_key: copyrightFormKey,
+                payment_slip_key: paymentSlipKey,
+                ...(body.title?.trim() ? { title: body.title.trim() } : {}),
+                ...(body.abstract?.trim() ? { abstract: body.abstract.trim() } : {}),
             })
             .eq('id', submission.id)
         if (error) throw new Error(error.message)

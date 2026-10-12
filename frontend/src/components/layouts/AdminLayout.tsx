@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useAuth } from '@/auth'
 import LayoutBase from '@/components/template/LayoutBase'
 import { LAYOUT_COLLAPSIBLE_SIDE } from '@/constants/theme.constant'
+import { SITE_NAME } from '@/constants/site.constant'
 import {
     LayoutDashboard,
     FileCheck,
@@ -59,9 +60,16 @@ const AdminLayout: React.FC<CommonProps> = ({ children }) => {
                         {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                     </Button>
 
-                    <Link to="/admin" className="flex items-center gap-2">
-                        <img src="/img/logo/jeri-logo.png" alt="JERI" className="h-8 w-auto object-contain" />
-                        <span className="font-semibold text-sm tracking-tight leading-none text-ink hidden sm:inline">JERI Admin</span>
+                    <Link to="/admin" className="flex items-center gap-2.5">
+                        <img src="/img/logo/jeri-logo.png" alt="JERI" className="h-8 w-auto object-contain shrink-0" />
+                        <div className="hidden sm:flex flex-col leading-tight">
+                            <span className="font-semibold text-xs md:text-sm tracking-tight text-ink whitespace-nowrap">
+                                {SITE_NAME}
+                            </span>
+                            <span className="text-[11px] text-purple-600 font-medium tracking-wide uppercase">
+                                Admin Panel
+                            </span>
+                        </div>
                     </Link>
                 </div>
 

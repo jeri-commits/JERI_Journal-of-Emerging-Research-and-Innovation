@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/auth'
 import LayoutBase from '@/components/template/LayoutBase'
 import { LAYOUT_COLLAPSIBLE_SIDE } from '@/constants/theme.constant'
+import { SITE_NAME_FULL } from '@/constants/site.constant'
 import {
     ArrowRight,
     LogOut,
@@ -74,7 +75,7 @@ const PublicLayout: React.FC<CommonProps> = ({ children }) => {
                             </Link>
                             <div className="flex-1 min-w-0 space-y-1">
                                 <h1 className="font-extrabold text-base sm:text-xl md:text-3xl lg:text-4xl text-ink tracking-tight leading-tight">
-                                    Journal of Emerging Research and Innovation (JERI)
+                                    {SITE_NAME_FULL}
                                 </h1>
                                 <p className="text-[11px] sm:text-sm md:text-base text-body font-medium">
                                     Published By Sir Padampat Singhania University, Udaipur
@@ -290,7 +291,7 @@ const PublicLayout: React.FC<CommonProps> = ({ children }) => {
                             className="h-20 md:h-24 w-auto max-w-[300px] md:max-w-[340px] object-contain drop-shadow-md mb-1 block" 
                         />
                         <h3 className="font-extrabold text-white text-base md:text-lg tracking-tight leading-snug">
-                            Journal of Emerging Research and Innovation (JERI)
+                            {SITE_NAME_FULL}
                         </h3>
                         <p className="text-xs text-white/80 leading-relaxed font-medium">
                             Premier Open Access Peer-Reviewed International Journal advancing discovery in science and technology.
@@ -351,7 +352,7 @@ const PublicLayout: React.FC<CommonProps> = ({ children }) => {
 
                 {/* Bottom Copyright Strip */}
                 <div className="border-t border-white/15 pt-6 text-center text-xs text-white/75 space-y-1 font-medium">
-                    <p>Copyright © {new Date().getFullYear()}: Journal of Emerging Research and Innovation (JERI). All Rights Reserved.</p>
+                    <p>Copyright © {new Date().getFullYear()}: {SITE_NAME_FULL}. All Rights Reserved.</p>
                     <p className="text-white/60 text-[11px]">Published & Maintained By Sir Padampat Singhania University, Udaipur</p>
                 </div>
             </footer>

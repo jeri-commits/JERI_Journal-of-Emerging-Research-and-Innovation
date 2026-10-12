@@ -5,16 +5,16 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useAuth } from '@/auth'
 import LayoutBase from '@/components/template/LayoutBase'
 import { LAYOUT_COLLAPSIBLE_SIDE } from '@/constants/theme.constant'
+import { SITE_NAME } from '@/constants/site.constant'
 import {
-    LayoutDashboard,
     FileText,
     PlusCircle,
-    UserCircle,
     LogOut,
     Menu,
     X,
     ChevronRight,
 } from 'lucide-react'
+import AccountDialog from '@/components/shared/AccountDialog'
 import type { CommonProps } from '@/@types/common'
 
 const initials = (label: string) =>
@@ -23,22 +23,31 @@ const initials = (label: string) =>
         .slice(0, 2)
         .toUpperCase()
 
+// Exactly two destinations: submit a paper, or see everything you've
+// submitted (stats + full table live on that same page now).
+const navItems = [
+    { label: 'Paper Submission', path: '/author/submissions/new', icon: PlusCircle },
+    { label: 'My Submissions', path: '/author', icon: FileText },
+]
+
 const AuthorLayout: React.FC<CommonProps> = ({ children }) => {
     const location = useLocation()
     const { user, signOut } = useAuth()
     const [sidebarOpen, setSidebarOpen] = useState(true)
+    const [accountOpen, setAccountOpen] = useState(false)
 
     const displayName = user?.userName || user?.email || 'Author'
 
-    const navItems = [
-        { label: 'Dashboard', path: '/author', icon: LayoutDashboard },
-        { label: 'My Submissions', path: '/author/submissions', icon: FileText },
-        { label: 'Submit Manuscript', path: '/author/submissions/new', icon: PlusCircle },
-        { label: 'My Profile', path: '/author/profile', icon: UserCircle },
-    ]
-
     const isNavActive = (path: string) => {
-        if (path === '/author') return location.pathname === path
+        if (path === '/author') {
+            // Also light up "My Submissions" for a submission's detail page
+            // (/author/submissions/:id), but not the separate "new" form.
+            return (
+                location.pathname === path ||
+                (location.pathname.startsWith('/author/submissions') &&
+                    !location.pathname.startsWith('/author/submissions/new'))
+            )
+        }
         return location.pathname.startsWith(path)
     }
 
@@ -57,22 +66,34 @@ const AuthorLayout: React.FC<CommonProps> = ({ children }) => {
                         {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                     </Button>
 
-                    <Link to="/author" className="flex items-center gap-2">
-                        <img src="/img/logo/jeri-logo.png" alt="JERI" className="h-8 w-auto object-contain" />
-                        <span className="font-semibold text-sm tracking-tight leading-none text-ink hidden sm:inline">JERI</span>
+                    <Link to="/author" className="flex items-center gap-2.5">
+                        <img src="/img/logo/jeri-logo.png" alt="JERI" className="h-8 w-auto object-contain shrink-0" />
+                        <div className="hidden sm:flex flex-col leading-tight">
+                            <span className="font-semibold text-xs md:text-sm tracking-tight text-ink whitespace-nowrap">
+                                {SITE_NAME}
+                            </span>
+                            <span className="text-[11px] text-text-link font-medium tracking-wide uppercase">
+                                Author Panel
+                            </span>
+                        </div>
                     </Link>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="hidden sm:flex items-center gap-2.5">
+                    <button
+                        type="button"
+                        onClick={() => setAccountOpen(true)}
+                        className="flex items-center gap-2.5 rounded-lg px-1.5 py-1 hover:bg-surface-strong transition-colors"
+                        title="Account settings"
+                    >
                         <Avatar className="h-8 w-8">
                             <AvatarFallback className="text-xs">{initials(displayName)}</AvatarFallback>
                         </Avatar>
-                        <div className="flex flex-col leading-tight">
+                        <div className="hidden sm:flex flex-col leading-tight text-left">
                             <span className="text-xs font-semibold text-ink truncate max-w-[160px]">{displayName}</span>
                             <span className="text-[11px] text-body truncate max-w-[160px]">{user?.email}</span>
                         </div>
-                    </div>
+                    </button>
 
                     <Button
                         variant="ghost"
@@ -145,6 +166,8 @@ const AuthorLayout: React.FC<CommonProps> = ({ children }) => {
                     {children}
                 </main>
             </div>
+
+            <AccountDialog open={accountOpen} onOpenChange={setAccountOpen} />
         </LayoutBase>
     )
 }

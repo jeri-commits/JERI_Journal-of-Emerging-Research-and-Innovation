@@ -80,7 +80,7 @@ const AdminSubmissionsList: React.FC = () => {
                     placeholder="Search by submission ID or title…"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="md:max-w-sm"
+                    className="md:max-w-[24rem]"
                 />
                 <select
                     className="rounded-md border border-hairline-strong bg-canvas px-3 py-2 text-sm text-ink focus:outline-none"

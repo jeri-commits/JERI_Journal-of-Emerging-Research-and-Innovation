@@ -19,6 +19,7 @@ import {
     Award,
     Ban
 } from 'lucide-react'
+import { SITE_NAME_FULL } from '@/constants/site.constant'
 
 const EthicStatements: React.FC = () => {
     const ethicsSections = [
@@ -168,10 +169,10 @@ JERI reserves the right to investigate suspected ethical violations and take app
                         Ethics Statements
                     </h1>
                     <p className="text-sm md:text-base font-bold text-primary">
-                        Journal of Emerging Research and Innovation (JERI)
+                        {SITE_NAME_FULL}
                     </p>
                     <p className="text-body-md text-body max-w-3xl mx-auto leading-relaxed">
-                        The Journal of Emerging Research and Innovation (JERI) is committed to maintaining the highest standards of publication ethics, academic integrity, transparency, and responsible scholarly communication.
+                        The {SITE_NAME_FULL} is committed to maintaining the highest standards of publication ethics, academic integrity, transparency, and responsible scholarly communication.
                     </p>
                 </div>
                 </ScrollReveal>

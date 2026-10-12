@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import ScrollReveal from '@/components/shared/ScrollReveal'
+import { SITE_NAME_FULL } from '@/constants/site.constant'
 import { 
     FileText, 
     ShieldAlert, 
@@ -107,7 +108,7 @@ const AuthorsGuide: React.FC = () => {
                         <span>Author Guidelines</span>
                     </Badge>
                     <h1 className="text-display-lg md:text-display-xl text-ink font-extrabold tracking-tight">
-                        Welcome to Journal of Emerging Research and Innovation (JERI)
+                        Welcome to {SITE_NAME_FULL}
                     </h1>
                     <p className="text-body-md text-body max-w-3xl mx-auto leading-relaxed">
                         Comprehensive guidelines for preparing, submitting, and publishing your research with complete editorial transparency and zero paywall barriers.
@@ -128,7 +129,7 @@ const AuthorsGuide: React.FC = () => {
 
                     <div className="bg-surface-card border border-hairline p-6 md:p-8 rounded-2xl space-y-4 text-body-md text-body leading-relaxed shadow-xs">
                         <p>
-                            <strong className="text-ink font-semibold">Journal of Emerging Research and Innovation (JERI)</strong> is a scholarly, peer-reviewed, open-access international journal dedicated to publishing high-quality original research, innovative ideas, emerging technologies, and interdisciplinary studies across science, engineering, technology, management, and related academic domains.
+                            <strong className="text-ink font-semibold">{SITE_NAME_FULL}</strong> is a scholarly, peer-reviewed, open-access international journal dedicated to publishing high-quality original research, innovative ideas, emerging technologies, and interdisciplinary studies across science, engineering, technology, management, and related academic domains.
                         </p>
                         <p>
                             JERI provides a global platform for researchers, academicians, scientists, industry professionals, and research scholars to share innovative research findings, emerging methodologies, technological developments, and practical solutions to contemporary challenges.
@@ -624,7 +625,7 @@ const AuthorsGuide: React.FC = () => {
                             Contact the Editorial Office
                         </h3>
                         <p className="text-xs md:text-sm text-white/85 font-medium">
-                            Journal of Emerging Research and Innovation (JERI)
+                            {SITE_NAME_FULL}
                         </p>
                     </div>
 

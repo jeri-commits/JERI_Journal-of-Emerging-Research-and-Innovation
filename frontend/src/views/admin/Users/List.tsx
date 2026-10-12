@@ -63,7 +63,7 @@ const AdminUsersList: React.FC = () => {
                 placeholder="Search by email…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="max-w-sm"
+                className="max-w-[24rem]"
             />
 
             <Card>

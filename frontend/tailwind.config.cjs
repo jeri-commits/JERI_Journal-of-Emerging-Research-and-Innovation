@@ -52,6 +52,20 @@ module.exports = {
 				xl: '1280px',
 				'2xl': '1536px',
 			},
+			// NOTE: this project's `extend.spacing` below (xs/sm/md/lg/xl,
+			// used for margins/padding/gaps) reuses the exact same key names
+			// Tailwind's default `maxWidth` scale uses. Tailwind's core
+			// `maxWidth` default is a *function* of `theme('spacing')`, and
+			// in this version's `@config` (v3-style JS config) compat layer,
+			// neither `extend.maxWidth` nor a full top-level `maxWidth`
+			// override here actually wins against that -- confirmed by
+			// direct production-build experiments: `max-w-md` kept resolving
+			// to `spacing.md` (20px) regardless of what's set here. Real bug,
+			// reproduced in a real deployed dialog collapsing to ~20px wide.
+			// Workaround (applied at every call site instead): use arbitrary
+			// values -- `max-w-[28rem]` instead of `max-w-md`, etc. -- which
+			// bypass the named scale entirely and compile correctly. Revisit
+			// if this project ever upgrades off `@config` to native `@theme`.
 			extend: {
 				colors: {
 					'primary': 'var(--primary)',

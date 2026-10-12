@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import ScrollReveal from '@/components/shared/ScrollReveal'
 import { Award, Crown, Building2, UserCheck, ShieldCheck } from 'lucide-react'
+import { SITE_NAME_FULL } from '@/constants/site.constant'
 
 const EditorialBoard: React.FC = () => {
     // 1. Leadership
@@ -102,7 +103,7 @@ const EditorialBoard: React.FC = () => {
                         Editorial Board
                     </h1>
                     <p className="text-body-md text-body max-w-3xl mx-auto leading-relaxed">
-                        The Journal of Emerging Research and Innovation (JERI) is guided by an experienced Editorial Board comprising distinguished academicians, researchers, and professionals committed to maintaining the highest standards of scholarly publishing and peer review.
+                        The {SITE_NAME_FULL} is guided by an experienced Editorial Board comprising distinguished academicians, researchers, and professionals committed to maintaining the highest standards of scholarly publishing and peer review.
                     </p>
                 </div>
 

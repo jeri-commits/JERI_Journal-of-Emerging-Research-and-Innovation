@@ -22,7 +22,7 @@ const AccessDenied: React.FC = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-canvas p-6 font-sans">
-            <Card className="max-w-md w-full p-8 text-center space-y-6">
+            <Card className="max-w-[28rem] w-full p-8 text-center space-y-6">
                 <div className="w-16 h-16 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 rounded-full flex items-center justify-center mx-auto text-3xl">
                     <ShieldAlert className="h-8 w-8" />
                 </div>

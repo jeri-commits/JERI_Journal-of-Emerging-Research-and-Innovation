@@ -2,10 +2,20 @@ import { AwsClient } from 'https://esm.sh/aws4fetch@1.0.17'
 import { HttpError } from './errors.ts'
 
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024 // 25MB
+// Manuscript uploads are "doc or docx" only per the form spec -- PDF
+// deliberately dropped here (it's still allowed for the two attachment
+// types below).
 const ALLOWED_MIME_TYPES = new Set([
-    'application/pdf',
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+])
+
+// Copyright form / payment slip: "pdf or png or jpg" per the form spec --
+// deliberately narrower than manuscript uploads (no Word docs here).
+const ALLOWED_ATTACHMENT_MIME_TYPES = new Set([
+    'application/pdf',
+    'image/png',
+    'image/jpeg',
 ])
 
 function r2Client(): AwsClient {
@@ -45,8 +55,28 @@ export function validateManuscriptFile(
     if (!ALLOWED_MIME_TYPES.has(mimeType)) {
         throw new HttpError(
             400,
-            'Manuscript must be a PDF or Word document (.pdf, .doc, .docx).',
+            'Manuscript must be a Word document (.doc or .docx).',
         )
+    }
+}
+
+export function validateAttachmentFile(
+    label: string,
+    fileName: string,
+    mimeType: string,
+    sizeBytes: number,
+) {
+    if (!fileName) {
+        throw new HttpError(400, `A ${label} file name is required.`)
+    }
+    if (sizeBytes <= 0 || sizeBytes > MAX_FILE_SIZE_BYTES) {
+        throw new HttpError(
+            400,
+            `${label} must be larger than 0 bytes and under ${MAX_FILE_SIZE_BYTES / (1024 * 1024)}MB.`,
+        )
+    }
+    if (!ALLOWED_ATTACHMENT_MIME_TYPES.has(mimeType)) {
+        throw new HttpError(400, `${label} must be a PDF, PNG, or JPG file.`)
     }
 }
 
@@ -56,6 +86,14 @@ export function buildObjectKey(
     fileName: string,
 ): string {
     return `papers/${submissionCode}/v${versionNumber}/${sanitizeFileName(fileName)}`
+}
+
+export function buildAttachmentObjectKey(
+    submissionCode: string,
+    kind: 'copyright-form' | 'payment-slip',
+    fileName: string,
+): string {
+    return `papers/${submissionCode}/attachments/${kind}/${sanitizeFileName(fileName)}`
 }
 
 /** Uploads manuscript bytes to R2. Throws on failure -- callers are

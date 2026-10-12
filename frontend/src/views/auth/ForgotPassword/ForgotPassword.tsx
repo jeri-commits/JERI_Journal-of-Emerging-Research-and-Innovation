@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Alert from '@/components/ui/Alert'
+import { SITE_NAME_FULL } from '@/constants/site.constant'
 import ForgotPasswordForm from './components/ForgotPasswordForm'
 import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
 import { ArrowLeft, BookOpen, GraduationCap, Atom, ScrollText, Globe, Sparkles, MailCheck } from 'lucide-react'
@@ -108,7 +109,7 @@ export const ForgotPassword: React.FC = () => {
             </div>
 
             <div className="text-center text-[10px] text-body font-medium z-10 relative pb-1">
-                © {new Date().getFullYear()} Journal of Emerging Research and Innovation (JERI). All rights reserved.
+                © {new Date().getFullYear()} {SITE_NAME_FULL}. All rights reserved.
             </div>
 
         </div>

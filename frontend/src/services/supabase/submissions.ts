@@ -6,7 +6,7 @@ import type {
 } from '@/@types/submissions'
 
 const SUBMISSION_COLUMNS =
-    'id, submission_code, author_id, title, abstract, keywords, category, journal_section, status, revision_count, current_version_id, reviewer_name, reviewer_email, reviewer_institution, reviewer_notes, created_at, updated_at, submitted_at, accepted_at, rejected_at, published_at'
+    'id, submission_code, author_id, title, abstract, paper_type, submission_mode, keywords, category, journal_section, status, revision_count, current_version_id, reviewer_name, reviewer_email, reviewer_institution, reviewer_notes, contact_phone, address_line1, address_line2, city, state_province, postal_code, contact_country, copyright_form_key, payment_slip_key, created_at, updated_at, submitted_at, accepted_at, rejected_at, published_at'
 
 /** Every submission belonging to the signed-in author (RLS already
  * scopes this to their own rows -- no author_id filter needed, but it's
@@ -90,6 +90,24 @@ export async function getSubmissionDetail(
         reviewer_feedback: feedback.data ?? [],
         submission_history: history.data ?? [],
     }
+}
+
+/** Looks up one of the signed-in author's own submissions by its
+ * human-readable code (RLS already scopes this to their own rows -- a
+ * code that exists but belongs to someone else simply won't match).
+ * Used by the Revised/Final Submission forms, which identify the paper
+ * by "Manuscript ID" rather than picking it from a list. */
+export async function findMySubmissionByCode(
+    submissionCode: string,
+): Promise<Submission | null> {
+    const { data, error } = await supabase
+        .from('submissions')
+        .select(SUBMISSION_COLUMNS)
+        .eq('submission_code', submissionCode.trim())
+        .maybeSingle()
+
+    if (error) throw new Error(error.message)
+    return (data as Submission) ?? null
 }
 
 export async function listMyNotifications(

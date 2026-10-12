@@ -17,22 +17,40 @@ import { EmailService } from '../_shared/emailTemplates.ts'
 type CoAuthor = {
     name: string
     email: string
-    affiliation?: string
+    department?: string
     institution?: string
+    country?: string
     correspondingAuthor?: boolean
 }
 
 type RequestBody = {
     title: string
     abstract: string
+    paperType: string
+    submissionMode?: string
     keywords: string[]
     category?: string
     journalSection?: string
     coAuthors: CoAuthor[]
+    contactPhone: string
+    addressLine1: string
+    addressLine2?: string
+    city: string
+    stateProvince: string
+    postalCode: string
+    contactCountry: string
     fileName: string
     mimeType: string
     fileBase64: string
 }
+
+const PAPER_TYPES = [
+    'Research Article',
+    'Review Article',
+    'Survey Article',
+    'Short Communication',
+    'Others',
+]
 
 Deno.serve(async (req) => {
     const preflight = handlePreflight(req)
@@ -47,6 +65,9 @@ Deno.serve(async (req) => {
         if (!body.title?.trim() || !body.abstract?.trim()) {
             throw new HttpError(400, 'Title and abstract are required.')
         }
+        if (!body.paperType || !PAPER_TYPES.includes(body.paperType)) {
+            throw new HttpError(400, 'A valid paper type is required.')
+        }
         if (!Array.isArray(body.coAuthors) || body.coAuthors.length === 0) {
             throw new HttpError(400, 'At least one author is required.')
         }
@@ -55,6 +76,14 @@ Deno.serve(async (req) => {
                 400,
                 'A maximum of 6 authors is permitted unless approved by the Editorial Board.',
             )
+        }
+        for (const a of body.coAuthors) {
+            if (!a.name?.trim() || !a.email?.trim() || !a.department?.trim() || !a.institution?.trim() || !a.country?.trim()) {
+                throw new HttpError(400, 'Each author needs a name, email, department, institution, and country.')
+            }
+        }
+        if (!body.contactPhone?.trim() || !body.addressLine1?.trim() || !body.city?.trim() || !body.stateProvince?.trim() || !body.postalCode?.trim() || !body.contactCountry?.trim()) {
+            throw new HttpError(400, 'Contact phone, address, city, state/province, pin/zip code, and country are required.')
         }
 
         validateManuscriptFile(
@@ -71,9 +100,18 @@ Deno.serve(async (req) => {
                 author_id: user.id,
                 title: body.title.trim(),
                 abstract: body.abstract.trim(),
+                paper_type: body.paperType,
+                submission_mode: body.submissionMode?.trim() || 'Regular',
                 keywords: body.keywords ?? [],
                 category: body.category ?? null,
                 journal_section: body.journalSection ?? null,
+                contact_phone: body.contactPhone.trim(),
+                address_line1: body.addressLine1.trim(),
+                address_line2: body.addressLine2?.trim() || null,
+                city: body.city.trim(),
+                state_province: body.stateProvince.trim(),
+                postal_code: body.postalCode.trim(),
+                contact_country: body.contactCountry.trim(),
             })
             .select('id, submission_code, title')
             .single()
@@ -88,8 +126,9 @@ Deno.serve(async (req) => {
                 submission_id: submission.id,
                 name: a.name,
                 email: a.email,
-                affiliation: a.affiliation ?? null,
+                department: a.department ?? null,
                 institution: a.institution ?? null,
+                country: a.country ?? null,
                 author_order: idx,
                 corresponding_author: Boolean(a.correspondingAuthor),
             }))

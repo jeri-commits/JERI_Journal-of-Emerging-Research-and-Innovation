@@ -85,7 +85,7 @@ const PaperSubmissions: React.FC = () => {
                         </div>
 
                         {/* Title & Explanatory Text */}
-                        <div className="space-y-1.5 max-w-lg mx-auto">
+                        <div className="space-y-1.5 max-w-[32rem] mx-auto">
                             <h2 className="text-lg md:text-xl font-extrabold text-ink tracking-tight">
                                 Authentication Required
                             </h2>

@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import ScrollReveal from '@/components/shared/ScrollReveal'
 import ParallaxLayer from '@/components/shared/ParallaxLayer'
+import { SITE_NAME_FULL } from '@/constants/site.constant'
 import { 
     Target, 
     Compass, 
@@ -186,7 +187,7 @@ const Home: React.FC = () => {
 
                     <div className="bg-surface-card border border-hairline p-6 md:p-8 rounded-2xl space-y-5 text-body-md text-body leading-relaxed shadow-xs">
                         <p>
-                            The <strong className="text-ink font-semibold">Journal of Emerging Research and Innovation (JERI)</strong> is a peer-reviewed, open-access platform dedicated to publishing high-quality original research, review articles, case studies, and innovative ideas across multiple disciplines. JERI aims to serve as a bridge between academia, industry, and society by promoting cutting-edge research that addresses real-world challenges and contributes to knowledge advancement.
+                            The <strong className="text-ink font-semibold">{SITE_NAME_FULL}</strong> is a peer-reviewed, open-access platform dedicated to publishing high-quality original research, review articles, case studies, and innovative ideas across multiple disciplines. JERI aims to serve as a bridge between academia, industry, and society by promoting cutting-edge research that addresses real-world challenges and contributes to knowledge advancement.
                         </p>
                         <p>
                             The journal welcomes contributions from students, researchers, academicians, and professionals working in emerging fields of science, engineering, technology, management, and social sciences. JERI is committed to maintaining high standards of academic integrity through a rigorous double-blind peer-review process, ensuring that published work is original, relevant, and impactful.

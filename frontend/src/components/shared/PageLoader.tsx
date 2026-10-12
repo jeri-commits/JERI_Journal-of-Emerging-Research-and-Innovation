@@ -53,7 +53,7 @@ const PageLoader: React.FC<PageLoaderProps> = ({ text = 'Journal of Emerging Res
                 })}
             </div>
 
-            <div className="flex flex-col items-center space-y-6 max-w-lg text-center relative z-10">
+            <div className="flex flex-col items-center space-y-6 max-w-[32rem] text-center relative z-10">
                 {/* Large Direct Logo (No Box) */}
                 <motion.img 
                     src="/img/logo/jeri-logo.png" 

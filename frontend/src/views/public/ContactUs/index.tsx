@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Alert } from '@/components/ui/Alert'
 import ScrollReveal from '@/components/shared/ScrollReveal'
 import { invokeFunction } from '@/services/supabase/functionsClient'
+import { SITE_NAME_FULL } from '@/constants/site.constant'
 import {
     Mail,
     Globe,
@@ -63,7 +64,7 @@ const ContactUs: React.FC = () => {
                         Contact Us
                     </h1>
                     <p className="text-body-md text-body max-w-3xl mx-auto leading-relaxed">
-                        Have questions regarding manuscript submission, peer review, publication policies, or the editorial process? The Journal of Emerging Research and Innovation (JERI) Editorial Office is here to assist you. For all journal-related inquiries, please contact us using the details below.
+                        Have questions regarding manuscript submission, peer review, publication policies, or the editorial process? The {SITE_NAME_FULL} Editorial Office is here to assist you. For all journal-related inquiries, please contact us using the details below.
                     </p>
                 </div>
                 </ScrollReveal>
@@ -156,7 +157,7 @@ const ContactUs: React.FC = () => {
                                 <div className="p-8 bg-emerald-500/10 border-2 border-emerald-500/30 rounded-2xl text-center space-y-3">
                                     <CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto" />
                                     <h4 className="text-lg font-bold text-ink">Message Sent Successfully!</h4>
-                                    <p className="text-xs text-body max-w-md mx-auto font-medium">
+                                    <p className="text-xs text-body max-w-[28rem] mx-auto font-medium">
                                         Thank you for contacting JERI Editorial Office. We have received your inquiry and will get back to you shortly at <span className="font-bold text-ink">{sentToEmail}</span>.
                                     </p>
                                     <Button

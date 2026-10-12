@@ -11,9 +11,8 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { useAuth } from '@/auth'
-import { Plus, FileText, Clock, CheckCircle, Eye, RefreshCw } from 'lucide-react'
+import { Plus, FileText, Clock, CheckCircle, RefreshCw, Eye } from 'lucide-react'
 import StatusBadge from '@/components/shared/StatusBadge'
-import NotificationsPanel from '@/components/shared/NotificationsPanel'
 import { listMySubmissions } from '@/services/supabase/submissions'
 import type { Submission } from '@/@types/submissions'
 
@@ -22,11 +21,13 @@ const AuthorDashboard: React.FC = () => {
     const { user } = useAuth()
     const [submissions, setSubmissions] = useState<Submission[]>([])
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState('')
 
     useEffect(() => {
         if (!user?.userId) return
         listMySubmissions(user.userId)
             .then(setSubmissions)
+            .catch((err) => setError(err.message))
             .finally(() => setLoading(false))
     }, [user?.userId])
 
@@ -98,72 +99,74 @@ const AuthorDashboard: React.FC = () => {
                 </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>My Manuscripts</CardTitle>
-                            <p className="text-sm text-body dark:text-on-dark-soft">
-                                Manage ongoing submissions and view reviewer decision reports.
-                            </p>
-                        </CardHeader>
-                        <CardContent>
-                            {loading && <p className="text-sm text-body">Loading…</p>}
-                            {!loading && submissions.length === 0 && (
-                                <p className="text-sm text-body">No submissions yet.</p>
-                            )}
-                            {!loading && submissions.length > 0 && (
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Manuscript ID & Title</TableHead>
-                                            <TableHead>Submitted</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead className="text-right">Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {submissions.slice(0, 6).map((m) => (
-                                            <TableRow key={m.id}>
-                                                <TableCell className="space-y-1">
-                                                    <div className="text-xs text-text-link font-semibold">{m.submission_code}</div>
-                                                    <div className="text-sm font-medium text-ink dark:text-on-dark line-clamp-1">{m.title}</div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {m.submitted_at ? new Date(m.submitted_at).toLocaleDateString() : '—'}
-                                                </TableCell>
-                                                <TableCell><StatusBadge status={m.status} /></TableCell>
-                                                <TableCell className="text-right">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="text-text-link gap-1"
-                                                        onClick={() => navigate(`/author/submissions/${m.id}`)}
-                                                    >
-                                                        <Eye className="h-3.5 w-3.5" /> View
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            )}
-                            {submissions.length > 6 && (
-                                <div className="pt-3 text-right">
-                                    <Button variant="link" size="sm" onClick={() => navigate('/author/submissions')}>
-                                        View all submissions →
-                                    </Button>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                </div>
-                <div>
-                    {user?.userId && (
-                        <NotificationsPanel userId={user.userId} basePath="/author/submissions" />
+            <Card>
+                <CardHeader>
+                    <CardTitle>My Submissions</CardTitle>
+                    <p className="text-sm text-body dark:text-on-dark-soft">
+                        Every manuscript you&apos;ve submitted to JERI, with its current status.
+                    </p>
+                </CardHeader>
+                <CardContent>
+                    {loading && <p className="text-sm text-body">Loading…</p>}
+                    {error && <p className="text-sm text-red-500">{error}</p>}
+                    {!loading && !error && submissions.length === 0 && (
+                        <p className="text-sm text-body">
+                            You haven&apos;t submitted any manuscripts yet.
+                        </p>
                     )}
-                </div>
-            </div>
+                    {!loading && submissions.length > 0 && (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Paper ID & Title</TableHead>
+                                    <TableHead>Submitted</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Revisions</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {submissions.map((s) => (
+                                    <TableRow key={s.id}>
+                                        <TableCell className="space-y-1">
+                                            <div className="text-xs text-text-link font-semibold">
+                                                {s.submission_code}
+                                            </div>
+                                            <div className="text-sm font-medium text-ink dark:text-on-dark line-clamp-1">
+                                                {s.title}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            {s.submitted_at
+                                                ? new Date(s.submitted_at).toLocaleDateString()
+                                                : '—'}
+                                        </TableCell>
+                                        <TableCell>
+                                            <StatusBadge status={s.status} />
+                                        </TableCell>
+                                        <TableCell>{s.revision_count}/3</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-text-link gap-1"
+                                                onClick={() => navigate(`/author/submissions/${s.id}`)}
+                                            >
+                                                <Eye className="h-3.5 w-3.5" /> View
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
+                </CardContent>
+                {!loading && submissions.length > 0 && (
+                    <div className="px-6 py-3 border-t border-hairline text-xs text-body">
+                        {submissions.length} submission{submissions.length === 1 ? '' : 's'} total
+                    </div>
+                )}
+            </Card>
         </div>
     )
 }

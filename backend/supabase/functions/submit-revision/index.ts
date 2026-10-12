@@ -25,6 +25,8 @@ import { EmailService } from '../_shared/emailTemplates.ts'
 
 type RequestBody = {
     submissionId: string
+    title?: string
+    abstract?: string
     fileName: string
     mimeType: string
     fileBase64: string
@@ -100,6 +102,8 @@ Deno.serve(async (req) => {
                 current_version_id: version.id,
                 revision_count: nextRevisionNumber,
                 status: 'REVISED_SUBMISSION',
+                ...(body.title?.trim() ? { title: body.title.trim() } : {}),
+                ...(body.abstract?.trim() ? { abstract: body.abstract.trim() } : {}),
             })
             .eq('id', submission.id)
         if (error) throw new Error(error.message)

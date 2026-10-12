@@ -3,12 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert } from '@/components/ui/Alert'
-import { ArrowLeft, UploadCloud } from 'lucide-react'
+import { ArrowLeft, ArrowRight, UploadCloud } from 'lucide-react'
 import StatusBadge from '@/components/shared/StatusBadge'
 import SubmissionTimeline from '@/components/shared/SubmissionTimeline'
 import ManuscriptVersionList from '@/components/shared/ManuscriptVersionList'
 import { getSubmissionDetail } from '@/services/supabase/submissions'
-import { submitRevision, submitFinal, submitCorrection } from '@/services/supabase/workflow'
+import { submitCorrection } from '@/services/supabase/workflow'
 import type { SubmissionDetail } from '@/@types/submissions'
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024
@@ -87,25 +87,6 @@ const AuthorSubmissionDetail: React.FC = () => {
         }
     }
 
-    const handleUpload = async (kind: 'revision' | 'final') => {
-        if (!submission || !file) return
-        setUploading(true)
-        setError('')
-        try {
-            if (kind === 'revision') {
-                await submitRevision(submission.id, file)
-            } else {
-                await submitFinal(submission.id, file)
-            }
-            setFile(null)
-            load()
-        } catch (err) {
-            setError((err as Error).message)
-        } finally {
-            setUploading(false)
-        }
-    }
-
     if (loading) return <div className="p-6">Loading…</div>
     if (error && !submission) {
         return (
@@ -122,7 +103,7 @@ const AuthorSubmissionDetail: React.FC = () => {
 
     return (
         <div className="p-6 max-w-4xl mx-auto space-y-6 font-sans">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/author/submissions')}>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/author')}>
                 <ArrowLeft className="h-3.5 w-3.5 mr-1.5" /> Back to submissions
             </Button>
 
@@ -184,7 +165,7 @@ const AuthorSubmissionDetail: React.FC = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle>
-                            {canFinalize ? 'Upload Final Version' : `Upload Revision (${submission.revision_count}/3 used)`}
+                            {canFinalize ? 'Final Version Due' : `Revision Due (${submission.revision_count}/3 used)`}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
@@ -193,19 +174,20 @@ const AuthorSubmissionDetail: React.FC = () => {
                                 <strong>Reviewer feedback:</strong> {latestFeedback.feedback}
                             </div>
                         )}
-                        <label className="p-5 border-2 border-dashed border-hairline-strong rounded-lg flex flex-col items-center gap-2 cursor-pointer bg-canvas-soft block">
-                            <UploadCloud className="h-7 w-7 text-primary" />
-                            <span className="text-sm font-medium text-ink">
-                                {file ? file.name : 'Click to choose a PDF, DOC, or DOCX file'}
-                            </span>
-                            <input type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={handleFileChange} />
-                        </label>
-                        {fileError && <p className="text-xs text-red-500">{fileError}</p>}
+                        <p className="text-sm text-body">
+                            {canFinalize
+                                ? 'Submit your final manuscript, copyright form, and payment slip from the Paper Submission page — select "Final Submission" and enter this paper\'s Manuscript ID.'
+                                : 'Submit your revised manuscript from the Paper Submission page — select "Revised Submission" and enter this paper\'s Manuscript ID.'}
+                        </p>
+                        <div className="p-3 bg-primary/5 border border-primary/20 rounded-xl text-xs font-mono text-ink">
+                            Manuscript ID: <strong>{submission.submission_code}</strong>
+                        </div>
                         <Button
-                            disabled={!file || uploading}
-                            onClick={() => handleUpload(canFinalize ? 'final' : 'revision')}
+                            className="flex items-center gap-2"
+                            onClick={() => navigate('/author/submissions/new')}
                         >
-                            {uploading ? 'Uploading…' : canFinalize ? 'Submit Final Version' : 'Submit Revision'}
+                            <span>Go to Paper Submission</span>
+                            <ArrowRight className="h-4 w-4" />
                         </Button>
                     </CardContent>
                 </Card>

@@ -2,6 +2,7 @@ import React from 'react'
 import { Badge } from '@/components/ui/badge'
 import ScrollReveal from '@/components/shared/ScrollReveal'
 import MonthArchives from './components/MonthArchives'
+import { SITE_NAME } from '@/constants/site.constant'
 
 const Archives: React.FC = () => {
     return (
@@ -16,7 +17,7 @@ const Archives: React.FC = () => {
                         Monthly Issues & Publication Records
                     </h1>
                     <p className="text-body-md text-body max-w-2xl mx-auto leading-relaxed">
-                        Browse open access monthly issues published by the Journal of Emerging Research and Innovation.
+                        Browse open access monthly issues published by the {SITE_NAME}.
                     </p>
                 </div>
                 </ScrollReveal>

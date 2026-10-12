@@ -83,13 +83,6 @@ export const protectedRoutes: Routes = [
         meta: { footer: false },
     },
     {
-        key: 'authorSubmissionsList',
-        path: '/author/submissions',
-        component: lazy(() => import('@/views/author/Submissions/List')),
-        authority: ['author', 'admin'],
-        meta: { footer: false },
-    },
-    {
         key: 'authorSubmissionsNew',
         path: '/author/submissions/new',
         component: lazy(() => import('@/views/author/Submissions/New')),
@@ -100,13 +93,6 @@ export const protectedRoutes: Routes = [
         key: 'authorSubmissionDetail',
         path: '/author/submissions/:id',
         component: lazy(() => import('@/views/author/Submissions/Detail')),
-        authority: ['author', 'admin'],
-        meta: { footer: false },
-    },
-    {
-        key: 'authorProfile',
-        path: '/author/profile',
-        component: lazy(() => import('@/views/author/Profile')),
         authority: ['author', 'admin'],
         meta: { footer: false },
     },

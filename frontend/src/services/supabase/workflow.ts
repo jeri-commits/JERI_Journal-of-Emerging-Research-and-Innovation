@@ -14,40 +14,66 @@ export async function readFileAsBase64(file: File): Promise<string> {
 export type CoAuthorInput = {
     name: string
     email: string
-    affiliation?: string
+    department?: string
     institution?: string
+    country?: string
     correspondingAuthor?: boolean
 }
 
 export async function createSubmission(params: {
     title: string
     abstract: string
+    paperType: string
+    submissionMode?: string
     keywords: string[]
     category?: string
     journalSection?: string
     coAuthors: CoAuthorInput[]
+    contactPhone: string
+    addressLine1: string
+    addressLine2?: string
+    city: string
+    stateProvince: string
+    postalCode: string
+    contactCountry: string
     file: File
 }): Promise<{ submissionId: string; submissionCode: string }> {
     const fileBase64 = await readFileAsBase64(params.file)
     return invoke('create-submission', {
         title: params.title,
         abstract: params.abstract,
+        paperType: params.paperType,
+        submissionMode: params.submissionMode,
         keywords: params.keywords,
         category: params.category,
         journalSection: params.journalSection,
         coAuthors: params.coAuthors,
+        contactPhone: params.contactPhone,
+        addressLine1: params.addressLine1,
+        addressLine2: params.addressLine2,
+        city: params.city,
+        stateProvince: params.stateProvince,
+        postalCode: params.postalCode,
+        contactCountry: params.contactCountry,
         fileName: params.file.name,
         mimeType: params.file.type,
         fileBase64,
     })
 }
 
-export async function submitRevision(submissionId: string, file: File) {
-    const fileBase64 = await readFileAsBase64(file)
+export async function submitRevision(params: {
+    submissionId: string
+    title?: string
+    abstract?: string
+    file: File
+}) {
+    const fileBase64 = await readFileAsBase64(params.file)
     return invoke<{ status: string; revisionCount: number }>('submit-revision', {
-        submissionId,
-        fileName: file.name,
-        mimeType: file.type,
+        submissionId: params.submissionId,
+        title: params.title,
+        abstract: params.abstract,
+        fileName: params.file.name,
+        mimeType: params.file.type,
         fileBase64,
     })
 }
@@ -79,13 +105,32 @@ export async function submitCorrection(params: {
     })
 }
 
-export async function submitFinal(submissionId: string, file: File) {
-    const fileBase64 = await readFileAsBase64(file)
+export async function submitFinal(params: {
+    submissionId: string
+    title?: string
+    abstract?: string
+    file: File
+    copyrightForm: File
+    paymentSlip: File
+}) {
+    const [fileBase64, copyrightFormBase64, paymentSlipBase64] = await Promise.all([
+        readFileAsBase64(params.file),
+        readFileAsBase64(params.copyrightForm),
+        readFileAsBase64(params.paymentSlip),
+    ])
     return invoke<{ status: string }>('submit-final', {
-        submissionId,
-        fileName: file.name,
-        mimeType: file.type,
+        submissionId: params.submissionId,
+        title: params.title,
+        abstract: params.abstract,
+        fileName: params.file.name,
+        mimeType: params.file.type,
         fileBase64,
+        copyrightFormFileName: params.copyrightForm.name,
+        copyrightFormMimeType: params.copyrightForm.type,
+        copyrightFormBase64,
+        paymentSlipFileName: params.paymentSlip.name,
+        paymentSlipMimeType: params.paymentSlip.type,
+        paymentSlipBase64,
     })
 }
 
