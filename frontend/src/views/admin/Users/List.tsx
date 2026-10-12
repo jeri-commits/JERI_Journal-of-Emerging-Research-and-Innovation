@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Alert } from '@/components/ui/Alert'
+import { FileText, Trash2 } from 'lucide-react'
 import {
     Table,
     TableBody,
@@ -13,7 +16,7 @@ import {
 } from '@/components/ui/table'
 import { useAuth } from '@/auth'
 import { listAllUsers } from '@/services/supabase/adminUsers'
-import { setUserRole } from '@/services/supabase/workflow'
+import { setUserRole, deleteUser } from '@/services/supabase/workflow'
 import type { AdminUserRow } from '@/services/supabase/adminUsers'
 
 const AdminUsersList: React.FC = () => {
@@ -23,6 +26,8 @@ const AdminUsersList: React.FC = () => {
     const [error, setError] = useState('')
     const [search, setSearch] = useState('')
     const [updatingId, setUpdatingId] = useState<string | null>(null)
+    const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
+    const [deletingId, setDeletingId] = useState<string | null>(null)
 
     const load = () => {
         listAllUsers()
@@ -46,12 +51,26 @@ const AdminUsersList: React.FC = () => {
         }
     }
 
+    const handleDelete = async (userId: string) => {
+        setDeletingId(userId)
+        setError('')
+        try {
+            await deleteUser(userId)
+            setPendingDeleteId(null)
+            load()
+        } catch (err) {
+            setError((err as Error).message)
+        } finally {
+            setDeletingId(null)
+        }
+    }
+
     const filtered = users.filter((u) =>
         u.email.toLowerCase().includes(search.trim().toLowerCase()),
     )
 
     return (
-        <div className="p-6 max-w-5xl mx-auto space-y-6 font-sans">
+        <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-5 font-sans">
             <div>
                 <h1 className="text-2xl font-bold text-ink">Users</h1>
                 <p className="text-sm text-body">Every registered account and its role.</p>
@@ -78,7 +97,8 @@ const AdminUsersList: React.FC = () => {
                                 <TableRow>
                                     <TableHead>Email</TableHead>
                                     <TableHead>Role</TableHead>
-                                    <TableHead className="text-right">Joined</TableHead>
+                                    <TableHead>Joined</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -104,8 +124,47 @@ const AdminUsersList: React.FC = () => {
                                                 </select>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-right text-body">
+                                        <TableCell className="text-body">
                                             {new Date(u.created_at).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <Button variant="ghost" size="sm" className="gap-1" asChild>
+                                                    <Link to={`/admin/submissions?authorId=${u.id}`}>
+                                                        <FileText className="h-3.5 w-3.5" /> Submissions
+                                                    </Link>
+                                                </Button>
+                                                {pendingDeleteId === u.id ? (
+                                                    <>
+                                                        <Button
+                                                            variant="destructive"
+                                                            size="sm"
+                                                            disabled={deletingId === u.id}
+                                                            onClick={() => handleDelete(u.id)}
+                                                        >
+                                                            Confirm delete
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            disabled={deletingId === u.id}
+                                                            onClick={() => setPendingDeleteId(null)}
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                    </>
+                                                ) : (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="gap-1 text-red-500 hover:text-red-600"
+                                                        disabled={u.id === currentUser?.userId}
+                                                        onClick={() => setPendingDeleteId(u.id)}
+                                                    >
+                                                        <Trash2 className="h-3.5 w-3.5" /> Delete
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}
