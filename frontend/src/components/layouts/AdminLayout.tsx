@@ -11,12 +11,13 @@ import {
     FileCheck,
     Users,
     Mail,
-    UserCircle,
     LogOut,
     Menu,
     X,
     ChevronRight,
 } from 'lucide-react'
+import NotificationBell from '@/components/shared/NotificationBell'
+import AccountDialog from '@/components/shared/AccountDialog'
 import type { CommonProps } from '@/@types/common'
 
 const initials = (label: string) =>
@@ -29,6 +30,7 @@ const AdminLayout: React.FC<CommonProps> = ({ children }) => {
     const location = useLocation()
     const { user, signOut } = useAuth()
     const [sidebarOpen, setSidebarOpen] = useState(true)
+    const [accountOpen, setAccountOpen] = useState(false)
 
     const displayName = user?.userName || user?.email || 'Admin'
 
@@ -37,7 +39,6 @@ const AdminLayout: React.FC<CommonProps> = ({ children }) => {
         { label: 'All Submissions', path: '/admin/submissions', icon: FileCheck },
         { label: 'Users', path: '/admin/users', icon: Users },
         { label: 'Email Log', path: '/admin/email-log', icon: Mail },
-        { label: 'My Profile', path: '/admin/profile', icon: UserCircle },
     ]
 
     const isNavActive = (path: string) => {
@@ -74,17 +75,25 @@ const AdminLayout: React.FC<CommonProps> = ({ children }) => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="hidden sm:flex items-center gap-2.5">
+                    {user?.userId && (
+                        <NotificationBell userId={user.userId} basePath="/admin/submissions" />
+                    )}
+                    <button
+                        type="button"
+                        onClick={() => setAccountOpen(true)}
+                        className="hidden sm:flex items-center gap-2.5 rounded-lg px-1.5 py-1 hover:bg-surface-strong transition-colors"
+                        title="Account settings"
+                    >
                         <Avatar className="h-8 w-8">
                             <AvatarFallback className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
                                 {initials(displayName)}
                             </AvatarFallback>
                         </Avatar>
-                        <div className="flex flex-col leading-tight">
+                        <div className="flex flex-col leading-tight text-left">
                             <span className="text-xs font-semibold text-ink truncate max-w-[160px]">{displayName}</span>
                             <span className="text-[11px] text-body truncate max-w-[160px]">{user?.email}</span>
                         </div>
-                    </div>
+                    </button>
 
                     <Button
                         variant="ghost"
@@ -157,6 +166,8 @@ const AdminLayout: React.FC<CommonProps> = ({ children }) => {
                     {children}
                 </main>
             </div>
+
+            <AccountDialog open={accountOpen} onOpenChange={setAccountOpen} />
         </LayoutBase>
     )
 }

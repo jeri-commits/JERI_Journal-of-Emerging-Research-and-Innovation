@@ -133,13 +133,6 @@ export const protectedRoutes: Routes = [
         meta: { footer: false },
     },
     {
-        key: 'adminProfile',
-        path: '/admin/profile',
-        component: lazy(() => import('@/views/admin/Profile')),
-        authority: ['admin'],
-        meta: { footer: false },
-    },
-    {
         key: 'adminEmailLog',
         path: '/admin/email-log',
         component: lazy(() => import('@/views/admin/EmailLog')),

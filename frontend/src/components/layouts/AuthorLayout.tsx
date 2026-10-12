@@ -15,6 +15,7 @@ import {
     ChevronRight,
 } from 'lucide-react'
 import AccountDialog from '@/components/shared/AccountDialog'
+import NotificationBell from '@/components/shared/NotificationBell'
 import type { CommonProps } from '@/@types/common'
 
 const initials = (label: string) =>
@@ -80,6 +81,9 @@ const AuthorLayout: React.FC<CommonProps> = ({ children }) => {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    {user?.userId && (
+                        <NotificationBell userId={user.userId} basePath="/author/submissions" />
+                    )}
                     <button
                         type="button"
                         onClick={() => setAccountOpen(true)}
