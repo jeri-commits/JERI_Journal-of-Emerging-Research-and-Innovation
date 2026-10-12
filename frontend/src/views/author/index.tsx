@@ -11,10 +11,12 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { useAuth } from '@/auth'
-import { Plus, FileText, Clock, CheckCircle, RefreshCw, Eye } from 'lucide-react'
+import { Plus, FileText, Clock, CheckCircle, RefreshCw, Eye, Copy, Check, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react'
 import StatusBadge from '@/components/shared/StatusBadge'
 import { listMySubmissions } from '@/services/supabase/submissions'
 import type { Submission } from '@/@types/submissions'
+
+const PAGE_SIZE = 10
 
 const AuthorDashboard: React.FC = () => {
     const navigate = useNavigate()
@@ -22,6 +24,8 @@ const AuthorDashboard: React.FC = () => {
     const [submissions, setSubmissions] = useState<Submission[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [page, setPage] = useState(1)
+    const [copiedId, setCopiedId] = useState<string | null>(null)
 
     useEffect(() => {
         if (!user?.userId) return
@@ -30,6 +34,21 @@ const AuthorDashboard: React.FC = () => {
             .catch((err) => setError(err.message))
             .finally(() => setLoading(false))
     }, [user?.userId])
+
+    const pageCount = Math.max(1, Math.ceil(submissions.length / PAGE_SIZE))
+    const pageStart = (page - 1) * PAGE_SIZE
+    const pagedSubmissions = submissions.slice(pageStart, pageStart + PAGE_SIZE)
+
+    const handleCopyCode = async (id: string, code: string) => {
+        try {
+            await navigator.clipboard.writeText(code)
+            setCopiedId(id)
+            setTimeout(() => setCopiedId((current) => (current === id ? null : current)), 1500)
+        } catch {
+            // clipboard API unavailable -- nothing to recover from, the
+            // user can still select and copy the text manually
+        }
+    }
 
     const underReview = submissions.filter((s) => s.status === 'UNDER_REVIEW').length
     const revisionsNeeded = submissions.filter((s) =>
@@ -40,7 +59,7 @@ const AuthorDashboard: React.FC = () => {
     ).length
 
     return (
-        <div className="p-6 space-y-8 max-w-7xl mx-auto font-sans">
+        <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto font-sans">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-hairline pb-6">
                 <div>
                     <h1 className="text-display-lg text-ink dark:text-on-dark font-semibold">
@@ -56,7 +75,7 @@ const AuthorDashboard: React.FC = () => {
                 </Button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Submissions</CardTitle>
@@ -126,15 +145,37 @@ const AuthorDashboard: React.FC = () => {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {submissions.map((s) => (
+                                {pagedSubmissions.map((s) => (
                                     <TableRow key={s.id}>
                                         <TableCell className="space-y-1">
-                                            <div className="text-xs text-text-link font-semibold">
-                                                {s.submission_code}
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-xs text-text-link font-semibold">
+                                                    {s.submission_code}
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    title="Copy Manuscript ID"
+                                                    onClick={() => handleCopyCode(s.id, s.submission_code)}
+                                                    className="text-body hover:text-ink transition-colors"
+                                                >
+                                                    {copiedId === s.id ? (
+                                                        <Check className="h-3 w-3 text-emerald-500" />
+                                                    ) : (
+                                                        <Copy className="h-3 w-3" />
+                                                    )}
+                                                </button>
                                             </div>
                                             <div className="text-sm font-medium text-ink dark:text-on-dark line-clamp-1">
                                                 {s.title}
                                             </div>
+                                            {s.latest_feedback_note && (
+                                                <div className="flex items-start gap-1 text-xs text-amber-700 dark:text-amber-400">
+                                                    <AlertTriangle className="h-3 w-3 mt-0.5 shrink-0" />
+                                                    <span className="line-clamp-1">
+                                                        {s.latest_feedback_note.replace(/[*_`#>-]/g, '')}
+                                                    </span>
+                                                </div>
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             {s.submitted_at
@@ -162,8 +203,36 @@ const AuthorDashboard: React.FC = () => {
                     )}
                 </CardContent>
                 {!loading && submissions.length > 0 && (
-                    <div className="px-6 py-3 border-t border-hairline text-xs text-body">
-                        {submissions.length} submission{submissions.length === 1 ? '' : 's'} total
+                    <div className="px-6 py-3 border-t border-hairline flex items-center justify-between gap-4">
+                        <p className="text-xs text-body">
+                            Showing {pageStart + 1} to {Math.min(pageStart + PAGE_SIZE, submissions.length)} of{' '}
+                            {submissions.length} result{submissions.length === 1 ? '' : 's'}
+                        </p>
+                        {pageCount > 1 && (
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={page <= 1}
+                                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                    className="gap-1"
+                                >
+                                    <ChevronLeft className="h-3.5 w-3.5" /> Prev
+                                </Button>
+                                <span className="text-xs text-body">
+                                    Page {page} of {pageCount}
+                                </span>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={page >= pageCount}
+                                    onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                                    className="gap-1"
+                                >
+                                    Next <ChevronRight className="h-3.5 w-3.5" />
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 )}
             </Card>
