@@ -57,7 +57,11 @@ Deno.serve(async (req) => {
         assertOwnership(submission, user.id)
         assertTransition(submission.status, 'SUBMITTED')
 
-        const updates: Record<string, unknown> = { status: 'SUBMITTED' }
+        const updates: Record<string, unknown> = {
+            status: 'SUBMITTED',
+            latest_feedback_note: null,
+            latest_feedback_at: null,
+        }
         if (body.title?.trim()) updates.title = body.title.trim()
         if (body.abstract?.trim()) updates.abstract = body.abstract.trim()
         if (body.keywords) updates.keywords = body.keywords

@@ -102,6 +102,8 @@ Deno.serve(async (req) => {
                 current_version_id: version.id,
                 revision_count: nextRevisionNumber,
                 status: 'REVISED_SUBMISSION',
+                latest_feedback_note: null,
+                latest_feedback_at: null,
                 ...(body.title?.trim() ? { title: body.title.trim() } : {}),
                 ...(body.abstract?.trim() ? { abstract: body.abstract.trim() } : {}),
             })
