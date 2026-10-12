@@ -33,7 +33,11 @@ Deno.serve(async (req) => {
 
         const { error } = await supabaseAdmin
             .from('submissions')
-            .update({ status: 'RETURNED_FOR_CORRECTION' })
+            .update({
+                status: 'RETURNED_FOR_CORRECTION',
+                latest_feedback_note: body.comments,
+                latest_feedback_at: new Date().toISOString(),
+            })
             .eq('id', submission.id)
         if (error) throw new Error(error.message)
 

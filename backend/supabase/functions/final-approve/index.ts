@@ -53,7 +53,12 @@ Deno.serve(async (req) => {
 
         const { error } = await supabaseAdmin
             .from('submissions')
-            .update({ status: newStatus, ...timestampColumn })
+            .update({
+                status: newStatus,
+                ...timestampColumn,
+                latest_feedback_note: body.action === 'return' ? body.comments ?? null : null,
+                latest_feedback_at: body.action === 'return' ? new Date().toISOString() : null,
+            })
             .eq('id', submission.id)
         if (error) throw new Error(error.message)
 
