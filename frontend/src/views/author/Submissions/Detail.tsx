@@ -2,16 +2,33 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Alert } from '@/components/ui/Alert'
-import { ArrowLeft, ArrowRight, UploadCloud, Paperclip, Download, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, ArrowRight, UploadCloud, Paperclip, Download, AlertTriangle, Pencil, Plus, Trash2, X } from 'lucide-react'
 import StatusBadge from '@/components/shared/StatusBadge'
 import SubmissionTimeline from '@/components/shared/SubmissionTimeline'
 import ManuscriptVersionList from '@/components/shared/ManuscriptVersionList'
 import MarkdownFeedback from '@/components/shared/MarkdownFeedback'
 import DecisionBadge from '@/components/shared/DecisionBadge'
 import { getSubmissionDetail } from '@/services/supabase/submissions'
-import { submitCorrection, getFeedbackAttachmentUrl } from '@/services/supabase/workflow'
+import {
+    submitCorrection,
+    getFeedbackAttachmentUrl,
+    updateSubmissionAuthors,
+} from '@/services/supabase/workflow'
 import type { SubmissionDetail } from '@/@types/submissions'
+import type { CoAuthorInput } from '@/services/supabase/workflow'
+
+const MAX_AUTHORS = 6
+
+const emptyAuthor = (): CoAuthorInput => ({
+    name: '',
+    email: '',
+    department: '',
+    institution: '',
+    country: '',
+    correspondingAuthor: false,
+})
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024
 const ALLOWED_TYPES = [
@@ -35,6 +52,58 @@ const AuthorSubmissionDetail: React.FC = () => {
     const [correctedTitle, setCorrectedTitle] = useState('')
     const [correctedAbstract, setCorrectedAbstract] = useState('')
     const [downloadingFeedbackId, setDownloadingFeedbackId] = useState<string | null>(null)
+    const [editingAuthors, setEditingAuthors] = useState(false)
+    const [authorDrafts, setAuthorDrafts] = useState<CoAuthorInput[]>([])
+    const [authorsError, setAuthorsError] = useState('')
+    const [authorsSaving, setAuthorsSaving] = useState(false)
+
+    const startEditingAuthors = () => {
+        if (!submission) return
+        setAuthorDrafts(
+            submission.submission_authors.map((a) => ({
+                name: a.name,
+                email: a.email,
+                department: a.department ?? '',
+                institution: a.institution ?? '',
+                country: a.country ?? '',
+                correspondingAuthor: a.corresponding_author,
+            })),
+        )
+        setAuthorsError('')
+        setEditingAuthors(true)
+    }
+
+    const updateAuthorDraft = (idx: number, patch: Partial<CoAuthorInput>) => {
+        setAuthorDrafts((prev) => prev.map((a, i) => (i === idx ? { ...a, ...patch } : a)))
+    }
+    const addAuthorDraft = () => {
+        if (authorDrafts.length >= MAX_AUTHORS) return
+        setAuthorDrafts((prev) => [...prev, emptyAuthor()])
+    }
+    const removeAuthorDraft = (idx: number) => {
+        setAuthorDrafts((prev) => prev.filter((_, i) => i !== idx))
+    }
+
+    const saveAuthors = async () => {
+        if (!submission) return
+        setAuthorsError('')
+        if (authorDrafts.some((a) => !a.name.trim() || !a.email.trim() || !a.department?.trim() || !a.institution?.trim() || !a.country?.trim())) {
+            return setAuthorsError('Every author needs a name, email, department, institution, and country.')
+        }
+        if (!authorDrafts.some((a) => a.correspondingAuthor)) {
+            return setAuthorsError('Please mark one author as the corresponding author.')
+        }
+        setAuthorsSaving(true)
+        try {
+            await updateSubmissionAuthors({ submissionId: submission.id, coAuthors: authorDrafts })
+            setEditingAuthors(false)
+            load()
+        } catch (err) {
+            setAuthorsError((err as Error).message)
+        } finally {
+            setAuthorsSaving(false)
+        }
+    }
 
     const handleDownloadFeedbackAttachment = async (feedbackId: string) => {
         setDownloadingFeedbackId(feedbackId)
@@ -227,6 +296,18 @@ const AuthorSubmissionDetail: React.FC = () => {
                         <p className="text-xs font-medium text-body mb-1">Abstract</p>
                         <p className="text-sm text-body leading-relaxed">{submission.abstract}</p>
                     </div>
+                    {submission.keywords.length > 0 && (
+                        <div>
+                            <p className="text-xs font-medium text-body mb-1">Keywords</p>
+                            <div className="flex flex-wrap gap-1.5">
+                                {submission.keywords.map((kw) => (
+                                    <span key={kw} className="text-xs bg-surface-strong text-ink px-2 py-0.5 rounded-full">
+                                        {kw}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <p className="text-xs font-medium text-body mb-1">Paper Type</p>
@@ -241,9 +322,16 @@ const AuthorSubmissionDetail: React.FC = () => {
             </Card>
 
             <Card>
-                <CardHeader><CardTitle>Author Info</CardTitle></CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Author Info</CardTitle>
+                    {submission.status !== 'PUBLISHED' && !editingAuthors && (
+                        <Button variant="outline" size="sm" className="gap-1.5" onClick={startEditingAuthors}>
+                            <Pencil className="h-3.5 w-3.5" /> Edit
+                        </Button>
+                    )}
+                </CardHeader>
                 <CardContent className="space-y-3">
-                    {submission.submission_authors.map((author) => (
+                    {!editingAuthors && submission.submission_authors.map((author) => (
                         <div
                             key={author.id}
                             className="p-3 bg-surface-card border border-hairline rounded-xl text-sm space-y-1"
@@ -264,6 +352,107 @@ const AuthorSubmissionDetail: React.FC = () => {
                             </p>
                         </div>
                     ))}
+
+                    {editingAuthors && (
+                        <div className="space-y-3">
+                            {authorsError && <Alert showIcon type="danger">{authorsError}</Alert>}
+                            {authorDrafts.map((author, idx) => (
+                                <div key={idx} className="p-3 border border-hairline-strong rounded-lg space-y-2.5 bg-canvas-soft/30">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
+                                            Author {idx + 1}
+                                        </span>
+                                        {authorDrafts.length > 1 && (
+                                            <Button
+                                                type="button"
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => removeAuthorDraft(idx)}
+                                                className="h-6 w-6 p-0 text-body hover:text-red-500"
+                                                title="Remove Author"
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                        <Input
+                                            placeholder="Full Name *"
+                                            value={author.name}
+                                            onChange={(e) => updateAuthorDraft(idx, { name: e.target.value })}
+                                            className="h-8 sm:h-9 text-xs"
+                                        />
+                                        <Input
+                                            type="email"
+                                            placeholder="Email Address *"
+                                            value={author.email}
+                                            onChange={(e) => updateAuthorDraft(idx, { email: e.target.value })}
+                                            className="h-8 sm:h-9 text-xs"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                        <Input
+                                            placeholder="Department *"
+                                            value={author.department}
+                                            onChange={(e) => updateAuthorDraft(idx, { department: e.target.value })}
+                                            className="h-8 sm:h-9 text-xs"
+                                        />
+                                        <Input
+                                            placeholder="Institution *"
+                                            value={author.institution}
+                                            onChange={(e) => updateAuthorDraft(idx, { institution: e.target.value })}
+                                            className="h-8 sm:h-9 text-xs"
+                                        />
+                                        <Input
+                                            placeholder="Country *"
+                                            value={author.country}
+                                            onChange={(e) => updateAuthorDraft(idx, { country: e.target.value })}
+                                            className="h-8 sm:h-9 text-xs"
+                                        />
+                                    </div>
+                                    <label className="inline-flex items-center gap-2 text-xs font-medium text-ink cursor-pointer pt-0.5">
+                                        <input
+                                            type="radio"
+                                            name="editCorrespondingAuthor"
+                                            checked={Boolean(author.correspondingAuthor)}
+                                            onChange={() =>
+                                                setAuthorDrafts((prev) => prev.map((a, i) => ({ ...a, correspondingAuthor: i === idx })))
+                                            }
+                                            className="text-primary focus:ring-primary h-3.5 w-3.5"
+                                        />
+                                        <span>Mark as Corresponding Author</span>
+                                    </label>
+                                </div>
+                            ))}
+                            <div className="flex items-center justify-between gap-2 pt-1">
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={addAuthorDraft}
+                                    disabled={authorDrafts.length >= MAX_AUTHORS}
+                                    className="gap-1.5"
+                                >
+                                    <Plus className="h-3.5 w-3.5" /> Add Author
+                                </Button>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => setEditingAuthors(false)}
+                                        disabled={authorsSaving}
+                                        className="gap-1.5"
+                                    >
+                                        <X className="h-3.5 w-3.5" /> Cancel
+                                    </Button>
+                                    <Button type="button" size="sm" onClick={saveAuthors} disabled={authorsSaving}>
+                                        {authorsSaving ? 'Saving…' : 'Save'}
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 

@@ -65,6 +65,7 @@ export async function submitRevision(params: {
     submissionId: string
     title?: string
     abstract?: string
+    keywords?: string[]
     file: File
 }) {
     const fileBase64 = await readFileAsBase64(params.file)
@@ -72,6 +73,7 @@ export async function submitRevision(params: {
         submissionId: params.submissionId,
         title: params.title,
         abstract: params.abstract,
+        keywords: params.keywords,
         fileName: params.file.name,
         mimeType: params.file.type,
         fileBase64,
@@ -109,6 +111,7 @@ export async function submitFinal(params: {
     submissionId: string
     title?: string
     abstract?: string
+    keywords?: string[]
     file: File
 }) {
     const fileBase64 = await readFileAsBase64(params.file)
@@ -116,10 +119,18 @@ export async function submitFinal(params: {
         submissionId: params.submissionId,
         title: params.title,
         abstract: params.abstract,
+        keywords: params.keywords,
         fileName: params.file.name,
         mimeType: params.file.type,
         fileBase64,
     })
+}
+
+export async function updateSubmissionAuthors(params: {
+    submissionId: string
+    coAuthors: CoAuthorInput[]
+}) {
+    return invoke<{ status: string }>('update-submission-authors', params)
 }
 
 export async function returnForCorrection(submissionId: string, comments: string) {

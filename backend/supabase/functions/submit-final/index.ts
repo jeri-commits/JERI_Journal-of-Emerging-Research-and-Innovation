@@ -25,6 +25,7 @@ type RequestBody = {
     submissionId: string
     title?: string
     abstract?: string
+    keywords?: string[]
     fileName: string
     mimeType: string
     fileBase64: string
@@ -102,6 +103,7 @@ Deno.serve(async (req) => {
                 latest_feedback_at: null,
                 ...(body.title?.trim() ? { title: body.title.trim() } : {}),
                 ...(body.abstract?.trim() ? { abstract: body.abstract.trim() } : {}),
+                ...(body.keywords ? { keywords: body.keywords } : {}),
             })
             .eq('id', submission.id)
         if (error) throw new Error(error.message)

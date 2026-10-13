@@ -39,6 +39,19 @@ const PAPER_TYPES = [
 
 const REVISABLE = ['MAJOR_REVISION', 'MINOR_REVISION']
 const FINALIZABLE = ['ACCEPTED', 'RETURNED_FINAL']
+const ABSTRACT_MIN_WORDS = 150
+const ABSTRACT_MAX_WORDS = 300
+
+function countWords(text: string): number {
+    return text.trim().length === 0 ? 0 : text.trim().split(/\s+/).length
+}
+
+function parseKeywords(raw: string): string[] {
+    return raw
+        .split(',')
+        .map((k) => k.trim())
+        .filter(Boolean)
+}
 
 const emptyAuthor = (correspondingAuthor = false): CoAuthorInput => ({
     name: '',
@@ -163,8 +176,9 @@ const NewSubmission: React.FC = () => {
     // ---- New Submission state ----
     const [title, setTitle] = useState('')
     const [abstract, setAbstract] = useState('')
+    const [keywords, setKeywords] = useState('')
     const [paperType, setPaperType] = useState('')
-    const [submissionMode] = useState('Regular')
+    const submissionMode = 'Regular'
     const [coAuthors, setCoAuthors] = useState<CoAuthorInput[]>([emptyAuthor(true)])
     const [contactPhone, setContactPhone] = useState('')
     const [addressLine1, setAddressLine1] = useState('')
@@ -181,6 +195,7 @@ const NewSubmission: React.FC = () => {
     const [registeredEmail, setRegisteredEmail] = useState(user?.email || '')
     const [rTitle, setRTitle] = useState('')
     const [rAbstract, setRAbstract] = useState('')
+    const [rKeywords, setRKeywords] = useState('')
     const [rFile, setRFile] = useState<File | null>(null)
     const [rFileError, setRFileError] = useState('')
 
@@ -217,6 +232,12 @@ const NewSubmission: React.FC = () => {
         setError('')
 
         if (!title.trim() || !abstract.trim()) return setError('Title and abstract are required.')
+        const abstractWords = countWords(abstract)
+        if (abstractWords < ABSTRACT_MIN_WORDS || abstractWords > ABSTRACT_MAX_WORDS) {
+            return setError(`Abstract must be between ${ABSTRACT_MIN_WORDS} and ${ABSTRACT_MAX_WORDS} words (currently ${abstractWords}).`)
+        }
+        const keywordList = parseKeywords(keywords)
+        if (keywordList.length === 0) return setError('Please provide at least one keyword.')
         if (!paperType) return setError('Please select a paper type.')
         if (coAuthors.some((a) => !a.name.trim() || !a.email.trim() || !a.department?.trim() || !a.institution?.trim() || !a.country?.trim())) {
             return setError('Every author needs a name, email, department, institution, and country.')
@@ -236,7 +257,7 @@ const NewSubmission: React.FC = () => {
                 abstract,
                 paperType,
                 submissionMode,
-                keywords: [],
+                keywords: keywordList,
                 coAuthors,
                 contactPhone,
                 addressLine1,
@@ -275,6 +296,12 @@ const NewSubmission: React.FC = () => {
         e.preventDefault()
         setError('')
         if (!rTitle.trim() || !rAbstract.trim()) return setError('Manuscript title and abstract are required.')
+        const revisedWords = countWords(rAbstract)
+        if (revisedWords < ABSTRACT_MIN_WORDS || revisedWords > ABSTRACT_MAX_WORDS) {
+            return setError(`Abstract must be between ${ABSTRACT_MIN_WORDS} and ${ABSTRACT_MAX_WORDS} words (currently ${revisedWords}).`)
+        }
+        const revisedKeywords = parseKeywords(rKeywords)
+        if (revisedKeywords.length === 0) return setError('Please provide at least one keyword.')
         if (!rFile) return setError('Please attach your revised manuscript file.')
 
         setSubmitting(true)
@@ -284,6 +311,7 @@ const NewSubmission: React.FC = () => {
                 submissionId: submission.id,
                 title: rTitle,
                 abstract: rAbstract,
+                keywords: revisedKeywords,
                 file: rFile,
             })
             navigate(`/author/submissions/${submission.id}`)
@@ -298,6 +326,12 @@ const NewSubmission: React.FC = () => {
         e.preventDefault()
         setError('')
         if (!rTitle.trim() || !rAbstract.trim()) return setError('Manuscript title and abstract are required.')
+        const finalWords = countWords(rAbstract)
+        if (finalWords < ABSTRACT_MIN_WORDS || finalWords > ABSTRACT_MAX_WORDS) {
+            return setError(`Abstract must be between ${ABSTRACT_MIN_WORDS} and ${ABSTRACT_MAX_WORDS} words (currently ${finalWords}).`)
+        }
+        const finalKeywords = parseKeywords(rKeywords)
+        if (finalKeywords.length === 0) return setError('Please provide at least one keyword.')
         if (!rFile) return setError('Please attach your final manuscript file.')
 
         setSubmitting(true)
@@ -307,6 +341,7 @@ const NewSubmission: React.FC = () => {
                 submissionId: submission.id,
                 title: rTitle,
                 abstract: rAbstract,
+                keywords: finalKeywords,
                 file: rFile,
             })
             navigate(`/author/submissions/${submission.id}`)
@@ -424,15 +459,31 @@ const NewSubmission: React.FC = () => {
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs sm:text-sm font-medium text-ink">Abstract *</label>
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs sm:text-sm font-medium text-ink">Abstract *</label>
+                                    <span className={`text-[11px] ${countWords(abstract) < ABSTRACT_MIN_WORDS || countWords(abstract) > ABSTRACT_MAX_WORDS ? 'text-red-500' : 'text-body'}`}>
+                                        {countWords(abstract)} / {ABSTRACT_MIN_WORDS}–{ABSTRACT_MAX_WORDS} words
+                                    </span>
+                                </div>
                                 <textarea
-                                    rows={3}
+                                    rows={5}
                                     className="w-full rounded-md border border-hairline-strong bg-canvas p-2.5 text-xs sm:text-sm text-ink focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary resize-y"
-                                    placeholder="Provide a concise abstract summarizing your research..."
+                                    placeholder="Provide a concise abstract summarizing your research (150-300 words)..."
                                     value={abstract}
                                     onChange={(e) => setAbstract(e.target.value)}
                                     required
                                 />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs sm:text-sm font-medium text-ink">Keywords *</label>
+                                <Input
+                                    value={keywords}
+                                    onChange={(e) => setKeywords(e.target.value)}
+                                    placeholder="e.g. machine learning, IoT, anomaly detection"
+                                    className="h-9 sm:h-10 text-xs sm:text-sm"
+                                    required
+                                />
+                                <p className="text-[11px] text-body">Comma-separated.</p>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="space-y-1">
@@ -446,14 +497,10 @@ const NewSubmission: React.FC = () => {
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs sm:text-sm font-medium text-ink">Submission Mode *</label>
-                                    <Select
-                                        value={submissionMode}
-                                        onChange={() => {}}
-                                        options={['Regular']}
-                                        placeholder="Regular"
-                                        required
-                                    />
+                                    <label className="text-xs sm:text-sm font-medium text-ink">Submission Mode</label>
+                                    <div className="h-9 sm:h-10 flex items-center px-3 rounded-md border border-hairline-strong bg-canvas-soft text-xs sm:text-sm text-ink">
+                                        {submissionMode}
+                                    </div>
                                 </div>
                             </div>
                         </CardContent>
@@ -722,15 +769,31 @@ const NewSubmission: React.FC = () => {
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs sm:text-sm font-medium text-ink">Abstract *</label>
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs sm:text-sm font-medium text-ink">Abstract *</label>
+                                    <span className={`text-[11px] ${countWords(rAbstract) < ABSTRACT_MIN_WORDS || countWords(rAbstract) > ABSTRACT_MAX_WORDS ? 'text-red-500' : 'text-body'}`}>
+                                        {countWords(rAbstract)} / {ABSTRACT_MIN_WORDS}–{ABSTRACT_MAX_WORDS} words
+                                    </span>
+                                </div>
                                 <textarea
-                                    rows={3}
+                                    rows={5}
                                     className="w-full rounded-md border border-hairline-strong bg-canvas p-2.5 text-xs sm:text-sm text-ink focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary resize-y"
-                                    placeholder="Updated abstract..."
+                                    placeholder="Updated abstract (150-300 words)..."
                                     value={rAbstract}
                                     onChange={(e) => setRAbstract(e.target.value)}
                                     required
                                 />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs sm:text-sm font-medium text-ink">Keywords *</label>
+                                <Input
+                                    value={rKeywords}
+                                    onChange={(e) => setRKeywords(e.target.value)}
+                                    placeholder="e.g. machine learning, IoT, anomaly detection"
+                                    className="h-9 sm:h-10 text-xs sm:text-sm"
+                                    required
+                                />
+                                <p className="text-[11px] text-body">Comma-separated.</p>
                             </div>
                             <FileDrop
                                 label="Revised Manuscript File * (.doc or .docx)"
@@ -807,15 +870,31 @@ const NewSubmission: React.FC = () => {
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs sm:text-sm font-medium text-ink">Manuscript Abstract *</label>
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs sm:text-sm font-medium text-ink">Manuscript Abstract *</label>
+                                    <span className={`text-[11px] ${countWords(rAbstract) < ABSTRACT_MIN_WORDS || countWords(rAbstract) > ABSTRACT_MAX_WORDS ? 'text-red-500' : 'text-body'}`}>
+                                        {countWords(rAbstract)} / {ABSTRACT_MIN_WORDS}–{ABSTRACT_MAX_WORDS} words
+                                    </span>
+                                </div>
                                 <textarea
-                                    rows={3}
+                                    rows={5}
                                     className="w-full rounded-md border border-hairline-strong bg-canvas p-2.5 text-xs sm:text-sm text-ink focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary resize-y"
-                                    placeholder="Final abstract..."
+                                    placeholder="Final abstract (150-300 words)..."
                                     value={rAbstract}
                                     onChange={(e) => setRAbstract(e.target.value)}
                                     required
                                 />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs sm:text-sm font-medium text-ink">Keywords *</label>
+                                <Input
+                                    value={rKeywords}
+                                    onChange={(e) => setRKeywords(e.target.value)}
+                                    placeholder="e.g. machine learning, IoT, anomaly detection"
+                                    className="h-9 sm:h-10 text-xs sm:text-sm"
+                                    required
+                                />
+                                <p className="text-[11px] text-body">Comma-separated.</p>
                             </div>
 
                             <div className="pt-1 border-t border-hairline">
