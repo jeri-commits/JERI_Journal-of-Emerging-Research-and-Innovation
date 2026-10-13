@@ -56,8 +56,6 @@ const AdminSubmissionsList: React.FC = () => {
                 status: STATUS_LABELS[s.status],
                 revision_count: s.revision_count,
                 submitted_at: s.submitted_at ?? '',
-                reviewer_name: s.reviewer_name ?? '',
-                reviewer_email: s.reviewer_email ?? '',
             })),
         [filtered],
     )

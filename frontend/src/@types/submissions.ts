@@ -41,10 +41,6 @@ export type Submission = {
     status: SubmissionStatus
     revision_count: number
     current_version_id: string | null
-    reviewer_name: string | null
-    reviewer_email: string | null
-    reviewer_institution: string | null
-    reviewer_notes: string | null
     contact_phone: string | null
     address_line1: string | null
     address_line2: string | null
@@ -52,8 +48,6 @@ export type Submission = {
     state_province: string | null
     postal_code: string | null
     contact_country: string | null
-    copyright_form_key: string | null
-    payment_slip_key: string | null
     latest_feedback_note: string | null
     latest_feedback_at: string | null
     created_at: string
@@ -69,7 +63,6 @@ export type SubmissionAuthor = {
     submission_id: string
     name: string
     email: string
-    affiliation: string | null
     institution: string | null
     department: string | null
     country: string | null

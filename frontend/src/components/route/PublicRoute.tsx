@@ -1,14 +1,14 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/auth'
 
+/** A signed-in user has no reason to see the public site or the
+ * sign-in/sign-up pages -- once authenticated, every public route sends
+ * them straight to their dashboard. The only way back to the public
+ * site is Logout. */
 const PublicRoute = () => {
     const { authenticated, user } = useAuth()
-    const { pathname } = useLocation()
 
-    // Auth routes should redirect already logged-in users to their dashboard
-    const isAuthPage = ['/sign-in', '/sign-up', '/forgot-password', '/reset-password'].includes(pathname)
-
-    if (authenticated && isAuthPage) {
+    if (authenticated) {
         const userAuthorities = user?.authority || []
         const redirectPath = userAuthorities.includes('admin') ? '/admin' : '/author'
         return <Navigate to={redirectPath} replace />

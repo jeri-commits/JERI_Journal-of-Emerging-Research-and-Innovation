@@ -10,8 +10,6 @@ export type SubmissionRow = {
     status: SubmissionStatus
     revision_count: number
     current_version_id: string | null
-    reviewer_name: string | null
-    reviewer_email: string | null
 }
 
 export async function loadSubmissionOrThrow(
@@ -20,7 +18,7 @@ export async function loadSubmissionOrThrow(
     const { data, error } = await supabaseAdmin
         .from('submissions')
         .select(
-            'id, submission_code, author_id, title, status, revision_count, current_version_id, reviewer_name, reviewer_email',
+            'id, submission_code, author_id, title, status, revision_count, current_version_id',
         )
         .eq('id', submissionId)
         .maybeSingle()
