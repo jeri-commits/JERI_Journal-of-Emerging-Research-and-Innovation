@@ -10,6 +10,7 @@ import SubmissionTimeline from '@/components/shared/SubmissionTimeline'
 import ManuscriptVersionList from '@/components/shared/ManuscriptVersionList'
 import MarkdownFeedback from '@/components/shared/MarkdownFeedback'
 import DecisionBadge from '@/components/shared/DecisionBadge'
+import CopyButton from '@/components/shared/CopyButton'
 import { getSubmissionDetail } from '@/services/supabase/submissions'
 import {
     submitCorrection,
@@ -194,7 +195,10 @@ const AuthorSubmissionDetail: React.FC = () => {
             <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-text-link">{submission.submission_code}</p>
-                    <h1 className="text-2xl font-bold text-ink break-words">{submission.title}</h1>
+                    <div className="flex items-start gap-2">
+                        <h1 className="text-2xl font-bold text-ink break-words">{submission.title}</h1>
+                        <CopyButton value={submission.title} label="Copy title" className="mt-1.5" />
+                    </div>
                 </div>
                 <StatusBadge status={submission.status} />
             </div>
@@ -293,12 +297,18 @@ const AuthorSubmissionDetail: React.FC = () => {
                 <CardHeader><CardTitle>Manuscript Info</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                     <div>
-                        <p className="text-xs font-medium text-body mb-1">Abstract</p>
+                        <div className="flex items-center gap-1.5 mb-1">
+                            <p className="text-xs font-medium text-body">Abstract</p>
+                            <CopyButton value={submission.abstract} label="Copy abstract" />
+                        </div>
                         <p className="text-sm text-body leading-relaxed">{submission.abstract}</p>
                     </div>
                     {submission.keywords.length > 0 && (
                         <div>
-                            <p className="text-xs font-medium text-body mb-1">Keywords</p>
+                            <div className="flex items-center gap-1.5 mb-1">
+                                <p className="text-xs font-medium text-body">Keywords</p>
+                                <CopyButton value={submission.keywords.join(', ')} label="Copy keywords" />
+                            </div>
                             <div className="flex flex-wrap gap-1.5">
                                 {submission.keywords.map((kw) => (
                                     <span key={kw} className="text-xs bg-surface-strong text-ink px-2 py-0.5 rounded-full">

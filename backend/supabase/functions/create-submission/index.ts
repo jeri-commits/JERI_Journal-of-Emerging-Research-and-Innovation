@@ -195,6 +195,7 @@ Deno.serve(async (req) => {
                     user.email,
                     submission.submission_code,
                     submission.title,
+                    submission.id,
                 )
             }
             const admins = await listAdmins()

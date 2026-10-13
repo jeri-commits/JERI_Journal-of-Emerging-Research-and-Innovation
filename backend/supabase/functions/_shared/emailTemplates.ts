@@ -4,6 +4,10 @@ const APP_URL = Deno.env.get('PUBLIC_APP_URL') ?? 'http://localhost:5173'
 const BRAND = '#0d74ce'
 const INK = '#0f172a'
 
+// Takes the submission's UUID (its primary key), never the human-readable
+// submission_code -- the app's route is /author/submissions/:id, looked
+// up by that UUID. Passing the code here used to produce a URL that
+// matched nothing and 404'd for every author who clicked an email link.
 function submissionLink(submissionId: string): string {
     return `${APP_URL}/author/submissions/${submissionId}`
 }
@@ -197,6 +201,7 @@ export const EmailService = {
         authorName: string,
         submissionCode: string,
         title: string,
+        submissionId: string,
     ) {
         const html = layout(
             'Submission received',
@@ -205,9 +210,34 @@ export const EmailService = {
                     'Thank you for submitting your manuscript to JERI. Your submission has been received and is now pending initial editorial checks.',
                 ) +
                 metaBlock(submissionCode, title) +
-                button(submissionLink(submissionCode), 'View Submission'),
+                button(submissionLink(submissionId), 'View Submission'),
         )
         await sendMail(to, `Submission Received — ${submissionCode}`, html)
+    },
+
+    /** Sent to the author right after they submit a revision -- a plain
+     * confirmation, distinct from the admin-facing "Revision N Submitted"
+     * notification (that one tells the editorial office a re-review is
+     * needed; this one just reassures the author their upload went
+     * through). */
+    async sendRevisionReceived(
+        to: string,
+        authorName: string,
+        submissionCode: string,
+        title: string,
+        revisionCount: number,
+        submissionId: string,
+    ) {
+        const html = layout(
+            'Revision submitted',
+            p(`Dear ${authorName},`) +
+                p(
+                    `Your revision has been submitted successfully (revision ${revisionCount} of 3) and is now awaiting re-review by the editorial office.`,
+                ) +
+                metaBlock(submissionCode, title) +
+                button(submissionLink(submissionId), 'View Submission'),
+        )
+        await sendMail(to, `Revision Submitted — ${submissionCode}`, html)
     },
 
     async sendReturnedForCorrection(
@@ -216,6 +246,7 @@ export const EmailService = {
         submissionCode: string,
         title: string,
         comments: string,
+        submissionId: string,
     ) {
         const html = layout(
             'Correction requested',
@@ -226,7 +257,7 @@ export const EmailService = {
                 metaBlock(submissionCode, title) +
                 p(`<strong>Editorial comments:</strong>`) +
                 renderFeedback(comments) +
-                button(submissionLink(submissionCode), 'View & Correct'),
+                button(submissionLink(submissionId), 'View & Correct'),
         )
         await sendMail(
             to,
@@ -243,7 +274,8 @@ export const EmailService = {
         decision: 'MAJOR_REVISION' | 'MINOR_REVISION',
         feedback: string,
         revisionCount: number,
-        attachmentName: string | null = null,
+        attachmentName: string | null,
+        submissionId: string,
     ) {
         const label = decision === 'MAJOR_REVISION' ? 'Major' : 'Minor'
         const html = layout(
@@ -258,7 +290,7 @@ export const EmailService = {
                 (attachmentName
                     ? p(`A file was attached to this feedback (<strong>${escapeHtml(attachmentName)}</strong>) — download it from the submission page.`)
                     : '') +
-                button(submissionLink(submissionCode), 'Submit Revision'),
+                button(submissionLink(submissionId), 'Submit Revision'),
         )
         await sendMail(
             to,
@@ -272,6 +304,7 @@ export const EmailService = {
         authorName: string,
         submissionCode: string,
         title: string,
+        submissionId: string,
     ) {
         const html = layout(
             'Your paper has been accepted',
@@ -283,7 +316,7 @@ export const EmailService = {
                 p(
                     'Please upload the final version of your manuscript, incorporating any outstanding corrections.',
                 ) +
-                button(submissionLink(submissionCode), 'Upload Final Version'),
+                button(submissionLink(submissionId), 'Upload Final Version'),
         )
         await sendMail(to, `Paper Accepted — ${submissionCode}`, html)
     },
@@ -314,6 +347,7 @@ export const EmailService = {
         submissionCode: string,
         title: string,
         comments: string,
+        submissionId: string,
     ) {
         const html = layout(
             'Final version needs changes',
@@ -324,7 +358,7 @@ export const EmailService = {
                 metaBlock(submissionCode, title) +
                 p(`<strong>Comments:</strong>`) +
                 renderFeedback(comments) +
-                button(submissionLink(submissionCode), 'Upload Corrected Final Version'),
+                button(submissionLink(submissionId), 'Upload Corrected Final Version'),
         )
         await sendMail(
             to,

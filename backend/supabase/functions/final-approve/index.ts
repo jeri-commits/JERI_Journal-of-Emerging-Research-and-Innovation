@@ -101,6 +101,7 @@ Deno.serve(async (req) => {
                     submission.submission_code,
                     submission.title,
                     body.comments!,
+                    submission.id,
                 )
             } else {
                 await EmailService.sendRejection(

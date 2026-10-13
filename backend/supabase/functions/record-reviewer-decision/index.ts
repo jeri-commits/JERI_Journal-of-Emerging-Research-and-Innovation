@@ -153,6 +153,7 @@ Deno.serve(async (req) => {
                     authorEmail,
                     submission.submission_code,
                     submission.title,
+                    submission.id,
                 )
             } else if (body.decision === 'REJECTED') {
                 await EmailService.sendRejection(
@@ -172,6 +173,7 @@ Deno.serve(async (req) => {
                     body.feedback,
                     submission.revision_count,
                     attachmentName,
+                    submission.id,
                 )
             }
         }

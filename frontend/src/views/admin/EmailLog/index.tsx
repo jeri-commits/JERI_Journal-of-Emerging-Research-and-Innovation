@@ -31,6 +31,7 @@ const TEST_EMAIL_OPTIONS: { value: TestEmailType; label: string; description: st
     { value: 'submission_received', label: 'Submission Received', description: 'Sent right after a new manuscript is submitted.' },
     { value: 'returned_for_correction', label: 'Returned for Correction', description: 'Sent when the editorial office requests pre-review fixes.' },
     { value: 'revision_required', label: 'Revision Required', description: 'Sent when a reviewer decision requires changes.' },
+    { value: 'revision_received', label: 'Revision Submitted (Author)', description: 'Sent to the author confirming their revision went through.' },
     { value: 'acceptance', label: 'Paper Accepted', description: 'Sent when a manuscript is accepted after review.' },
     { value: 'rejection', label: 'Submission Rejected', description: 'Sent when a manuscript is rejected.' },
     { value: 'final_returned', label: 'Final Version Returned', description: 'Sent when a final submission needs changes.' },

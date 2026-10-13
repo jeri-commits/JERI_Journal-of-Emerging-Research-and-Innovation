@@ -20,7 +20,7 @@ import {
     validateManuscriptFile,
 } from '../_shared/storage.ts'
 import { recordHistory } from '../_shared/history.ts'
-import { notifyAllAdmins, listAdmins } from '../_shared/notifications.ts'
+import { notifyAllAdmins, notifyUser, listAdmins } from '../_shared/notifications.ts'
 import { EmailService } from '../_shared/emailTemplates.ts'
 
 type RequestBody = {
@@ -133,6 +133,25 @@ Deno.serve(async (req) => {
             `Revision ${nextRevisionNumber} Submitted — ${submission.submission_code}`,
             `${submission.title} has a new revision (${nextRevisionNumber} of 3) awaiting re-review.`,
         )
+
+        await notifyUser(
+            submission.author_id,
+            submission.id,
+            'revision_submitted',
+            `Revision Submitted — ${submission.submission_code}`,
+            `Your revision has been submitted successfully (revision ${nextRevisionNumber} of 3) and is now awaiting re-review.`,
+        )
+
+        if (user.email) {
+            await EmailService.sendRevisionReceived(
+                user.email,
+                user.email,
+                submission.submission_code,
+                submission.title,
+                nextRevisionNumber,
+                submission.id,
+            )
+        }
 
         return jsonResponse({
             status: 'REVISED_SUBMISSION',

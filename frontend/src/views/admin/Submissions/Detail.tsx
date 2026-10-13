@@ -10,6 +10,7 @@ import ManuscriptVersionList from '@/components/shared/ManuscriptVersionList'
 import MarkdownFeedback from '@/components/shared/MarkdownFeedback'
 import FeedbackEditor from '@/components/shared/FeedbackEditor'
 import DecisionBadge from '@/components/shared/DecisionBadge'
+import CopyButton from '@/components/shared/CopyButton'
 import { getSubmissionDetail } from '@/services/supabase/submissions'
 import { supabase } from '@/configs/supabase.config'
 import {
@@ -103,7 +104,10 @@ const AdminSubmissionDetail: React.FC = () => {
             <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-text-link">{submission.submission_code}</p>
-                    <h1 className="text-2xl font-bold text-ink break-words">{submission.title}</h1>
+                    <div className="flex items-start gap-2">
+                        <h1 className="text-2xl font-bold text-ink break-words">{submission.title}</h1>
+                        <CopyButton value={submission.title} label="Copy title" className="mt-1.5" />
+                    </div>
                     <p className="text-sm text-body">Author: {authorEmail || submission.author_id}</p>
                 </div>
                 <StatusBadge status={status} />
@@ -241,11 +245,17 @@ const AdminSubmissionDetail: React.FC = () => {
             )}
 
             <Card>
-                <CardHeader><CardTitle>Abstract</CardTitle></CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Abstract</CardTitle>
+                    <CopyButton value={submission.abstract} label="Copy abstract" />
+                </CardHeader>
                 <CardContent>
                     <p className="text-sm text-body leading-relaxed">{submission.abstract}</p>
                     {submission.keywords.length > 0 && (
-                        <p className="text-xs text-body mt-2">Keywords: {submission.keywords.join(', ')}</p>
+                        <div className="flex items-center gap-1.5 mt-2">
+                            <p className="text-xs text-body">Keywords: {submission.keywords.join(', ')}</p>
+                            <CopyButton value={submission.keywords.join(', ')} label="Copy keywords" />
+                        </div>
                     )}
                 </CardContent>
             </Card>

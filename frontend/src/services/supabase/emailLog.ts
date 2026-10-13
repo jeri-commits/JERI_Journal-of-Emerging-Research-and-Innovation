@@ -8,6 +8,7 @@ export type TestEmailType =
     | 'submission_received'
     | 'returned_for_correction'
     | 'revision_required'
+    | 'revision_received'
     | 'acceptance'
     | 'rejection'
     | 'final_returned'

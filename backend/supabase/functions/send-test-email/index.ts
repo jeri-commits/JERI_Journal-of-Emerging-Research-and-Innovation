@@ -11,6 +11,7 @@ const TEST_EMAIL_TYPES = [
     'submission_received',
     'returned_for_correction',
     'revision_required',
+    'revision_received',
     'acceptance',
     'rejection',
     'final_returned',
@@ -31,6 +32,10 @@ const SAMPLE_CODE = 'JERI-00000'
 const SAMPLE_TITLE = 'Sample Manuscript Title for Testing'
 const SAMPLE_FEEDBACK =
     'This is **sample reviewer feedback** for testing. It includes:\n- A bullet point\n- Another bullet point'
+// A test email has no real submission row to link to -- this is just a
+// syntactically valid UUID so the "View Submission" button has somewhere
+// to point (it won't resolve to a real page, which is fine for a preview).
+const SAMPLE_SUBMISSION_ID = '00000000-0000-0000-0000-000000000000'
 
 async function sendOne(type: Exclude<TestEmailType, 'all'>, to: string) {
     switch (type) {
@@ -48,7 +53,7 @@ async function sendOne(type: Exclude<TestEmailType, 'all'>, to: string) {
             await EmailService.sendPasswordChangedEmail(to)
             return
         case 'submission_received':
-            await EmailService.sendSubmissionReceived(to, 'Test Author', SAMPLE_CODE, SAMPLE_TITLE)
+            await EmailService.sendSubmissionReceived(to, 'Test Author', SAMPLE_CODE, SAMPLE_TITLE, SAMPLE_SUBMISSION_ID)
             return
         case 'returned_for_correction':
             await EmailService.sendReturnedForCorrection(
@@ -57,6 +62,7 @@ async function sendOne(type: Exclude<TestEmailType, 'all'>, to: string) {
                 SAMPLE_CODE,
                 SAMPLE_TITLE,
                 'Please fix the formatting of Table 2 and resubmit.',
+                SAMPLE_SUBMISSION_ID,
             )
             return
         case 'revision_required':
@@ -68,10 +74,15 @@ async function sendOne(type: Exclude<TestEmailType, 'all'>, to: string) {
                 'MINOR_REVISION',
                 SAMPLE_FEEDBACK,
                 0,
+                null,
+                SAMPLE_SUBMISSION_ID,
             )
             return
+        case 'revision_received':
+            await EmailService.sendRevisionReceived(to, 'Test Author', SAMPLE_CODE, SAMPLE_TITLE, 1, SAMPLE_SUBMISSION_ID)
+            return
         case 'acceptance':
-            await EmailService.sendAcceptance(to, 'Test Author', SAMPLE_CODE, SAMPLE_TITLE)
+            await EmailService.sendAcceptance(to, 'Test Author', SAMPLE_CODE, SAMPLE_TITLE, SAMPLE_SUBMISSION_ID)
             return
         case 'rejection':
             await EmailService.sendRejection(to, 'Test Author', SAMPLE_CODE, SAMPLE_TITLE, SAMPLE_FEEDBACK)
@@ -83,6 +94,7 @@ async function sendOne(type: Exclude<TestEmailType, 'all'>, to: string) {
                 SAMPLE_CODE,
                 SAMPLE_TITLE,
                 'The copyright form is missing a signature.',
+                SAMPLE_SUBMISSION_ID,
             )
             return
         case 'final_submission_received':
