@@ -12,6 +12,13 @@ function submissionLink(submissionId: string): string {
     return `${APP_URL}/author/submissions/${submissionId}`
 }
 
+// Same idea, but for emails that go to the editorial team -- admins land
+// on /admin/submissions/:id, a different route than the author's own
+// page for the same submission.
+function adminSubmissionLink(submissionId: string): string {
+    return `${APP_URL}/admin/submissions/${submissionId}`
+}
+
 /** One shared branded shell -- every template below just supplies the
  * heading + body paragraphs, so the JERI look stays consistent and only
  * lives in one place. Uses a real embedded logo (base64, not a hosted
@@ -372,12 +379,14 @@ export const EmailService = {
         authorName: string,
         submissionCode: string,
         title: string,
+        submissionId: string,
     ) {
         const html = layout(
             'Final version submitted',
             p(
                 `${authorName} has submitted the final version of an accepted manuscript.`,
-            ) + metaBlock(submissionCode, title),
+            ) + metaBlock(submissionCode, title) +
+                button(adminSubmissionLink(submissionId), 'Review Submission'),
         )
         for (const to of adminEmails) {
             await sendMail(to, `Final Submission Received — ${submissionCode}`, html)
@@ -426,8 +435,11 @@ export const EmailService = {
         await sendMail(to, `Review Request — ${submissionCode}`, html)
     },
 
-    async notifyAdmins(adminEmails: string[], subject: string, bodyText: string) {
-        const html = layout(subject, p(bodyText))
+    async notifyAdmins(adminEmails: string[], subject: string, bodyText: string, submissionId?: string) {
+        const html = layout(
+            subject,
+            p(bodyText) + (submissionId ? button(adminSubmissionLink(submissionId), 'Review Submission') : ''),
+        )
         for (const to of adminEmails) await sendMail(to, subject, html)
     },
 

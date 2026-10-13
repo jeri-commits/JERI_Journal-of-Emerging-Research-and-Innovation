@@ -135,6 +135,7 @@ Deno.serve(async (req) => {
             authorProfile?.email ?? 'The author',
             submission.submission_code,
             submission.title,
+            submission.id,
         )
 
         return jsonResponse({ status: 'FINAL_SUBMISSION' })

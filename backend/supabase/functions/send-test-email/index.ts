@@ -98,7 +98,7 @@ async function sendOne(type: Exclude<TestEmailType, 'all'>, to: string) {
             )
             return
         case 'final_submission_received':
-            await EmailService.sendFinalSubmissionReceived([to], 'Test Author', SAMPLE_CODE, SAMPLE_TITLE)
+            await EmailService.sendFinalSubmissionReceived([to], 'Test Author', SAMPLE_CODE, SAMPLE_TITLE, SAMPLE_SUBMISSION_ID)
             return
         case 'publication_approval':
             await EmailService.sendPublicationApproval(to, 'Test Author', SAMPLE_CODE, SAMPLE_TITLE)

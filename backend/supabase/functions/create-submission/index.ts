@@ -203,6 +203,7 @@ Deno.serve(async (req) => {
                 admins.map((a) => a.email).filter((e): e is string => Boolean(e)),
                 `New Submission — ${submission.submission_code}`,
                 `${submission.title} was submitted and is awaiting initial editorial review.`,
+                submission.id,
             )
 
             return jsonResponse({

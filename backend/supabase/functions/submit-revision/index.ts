@@ -132,6 +132,7 @@ Deno.serve(async (req) => {
             admins.map((a) => a.email).filter((e): e is string => Boolean(e)),
             `Revision ${nextRevisionNumber} Submitted — ${submission.submission_code}`,
             `${submission.title} has a new revision (${nextRevisionNumber} of 3) awaiting re-review.`,
+            submission.id,
         )
 
         await notifyUser(

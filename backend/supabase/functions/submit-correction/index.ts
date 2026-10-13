@@ -145,6 +145,7 @@ Deno.serve(async (req) => {
             admins.map((a) => a.email).filter((e): e is string => Boolean(e)),
             `Correction Resubmitted — ${submission.submission_code}`,
             `${submission.title} has been corrected and resubmitted for initial editorial triage.`,
+            submission.id,
         )
 
         return jsonResponse({ status: 'SUBMITTED' })
