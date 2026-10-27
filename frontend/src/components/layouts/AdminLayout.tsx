@@ -11,6 +11,7 @@ import {
     FileCheck,
     Users,
     Mail,
+    GraduationCap,
     LogOut,
     Menu,
     X,
@@ -39,6 +40,7 @@ const AdminLayout: React.FC<CommonProps> = ({ children }) => {
         { label: 'All Submissions', path: '/admin/submissions', icon: FileCheck },
         { label: 'Users', path: '/admin/users', icon: Users },
         { label: 'Email Log', path: '/admin/email-log', icon: Mail },
+        { label: 'Editorial Board', path: '/admin/editorial-board', icon: GraduationCap },
     ]
 
     const isNavActive = (path: string) => {

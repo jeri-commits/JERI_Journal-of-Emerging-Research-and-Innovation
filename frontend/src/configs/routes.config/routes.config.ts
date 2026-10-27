@@ -139,6 +139,13 @@ export const protectedRoutes: Routes = [
         authority: ['admin'],
         meta: { footer: false },
     },
+    {
+        key: 'adminEditorialBoard',
+        path: '/admin/editorial-board',
+        component: lazy(() => import('@/views/admin/EditorialBoard')),
+        authority: ['admin'],
+        meta: { footer: false },
+    },
     // General Protected Home Route
     {
         key: 'home',
